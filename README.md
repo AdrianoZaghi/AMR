@@ -22,9 +22,9 @@ Each of those steps add some file in the population_ directories that should hav
 
 The read library generation is the procedure that we implemented in order to obtain simulated read libraries starting from genome sequences (.fasta files). This job is handled by Camisim and the command which is passed to it is reported in the Snakefile under the rule "camisim". In this rule are generated the reads in the anonimus mode of the software and then is used a script in order to separe the backvard and forward reads in the two pair end files. This rule is likely to require the execution of the rule "population set up". In this rule is lunched a script that generates theinput files required by Camisim, starting from the information contained in input.json and input.tsv. Following this procedure, many paramethers of Camisim execution are set with default values that we found appropriate for our goal. Anyway, if someone intend to modify those parameters should modify the script "my_scripts/generate_files.py" and follow camisim manual.
 Once the directories are fully prepared, the following command can be used (in the AMR directory) to generate the read libraries:
-'''
+```
 snakemake -c8 reads_1.fastq --use-conda
-'''
+```
 
 ## Allignemnt
 

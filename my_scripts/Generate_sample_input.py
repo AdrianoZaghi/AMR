@@ -6,12 +6,11 @@ Created on Thu Nov 10 17:34:05 2022
 @author: utente
 """
 import json
+from numpy import random
 
-
-def generate_input_tsv(Strains_path, Metadata_path, Resistance_percentage, Other_genomes_path = []):
+def generate_input_tsv(input_name, Metadata_path, Resistance_percentage, Other_genomes_path = []):
 	species_space = 1 / (len(Other_genomes_path)+1)
-	print(species_space)
-	with open("input.tsv", 'w') as tab:
+	with open(input_name, 'w') as tab:
 		with open(Metadata_path+"_S.json", 'r') as S, open(Metadata_path+"_R.json", 'r') as R: 
 			print("Genome_ID\tSpecies_Name\tAbundance\tPATRIC_ID\tAntibiotic\tPhenotype\tGenome_length\tNovelty_category\tGenome_file", file = tab)
 			Su, Re = json.load(S), json.load(R)
@@ -22,5 +21,7 @@ def generate_input_tsv(Strains_path, Metadata_path, Resistance_percentage, Other
 				Ot = json.load(O)
 				print(Ot["Genome_ID"]+"\t"+Ot["Species_Name"]+"\t"+str(species_space*Resistance_percentage)+"\t"+Ot["PATRIC_ID"]+"\t"+Ot["AntibioticPhenotype"]+"\t"+Ot["Genome_length"]+"\t"+Ot["Novelty_category"]+"\t"+path, file=tab)
 
-pop = "population_prova_0"
-generate_input_tsv("Roberto", pop+"/genomes/Metadata_Aureus", 0.7)
+how_many_samples = 20
+distribuzione = random.uniform(low=0, high=1, size=how_many_samples)
+for i in range(how_many_samples):
+	generate_input_tsv("input_p"+str(i), "Metadata_Aureus", round(distribuzione[i],5))

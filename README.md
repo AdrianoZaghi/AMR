@@ -20,11 +20,21 @@ Each of those steps add some file in the population_ directories that should hav
 
 ## Read library generation
 
-The read library generation is the procedure that we implemented in order to obtain simulated read libraries starting from genome sequences (.fasta files). This job is handled by Camisim and the command which is passed to it is reported in the Snakefile under the rule "camisim". In this rule are generated the reads in the anonimus mode of the software and then is used a script in order to separe the backvard and forward reads in the two pair end files. This rule is likely to require the execution of the rule "population set up". In this rule is lunched a script that generates theinput files required by Camisim, starting from the information contained in input.json and input.tsv. Following this procedure, many paramethers of Camisim execution are set with default values that we found appropriate for our goal. Anyway, if someone intend to modify those parameters should modify the script "my_scripts/generate_files.py" and follow camisim manual.
+The read library generation is the procedure that we implemented in order to obtain simulated read libraries starting from genome sequences (.fasta files). This job is handled by Camisim and the command which is passed to it is reported in the Snakefile under the rule "camisim". In this rule are generated the reads in the anonimus mode of the software and then is used a script in order to separe the backward and forward reads in the two pair end files. This rule is likely to require the execution of the rule "population set up". In this rule is lunched a script that generates the input files required by Camisim, starting from the information contained in input.json and input.tsv. Following this procedure, many paramethers of Camisim execution are set with default values that we found appropriate for our goal. Anyway, if someone intend to modify those parameters should modify the script "my_scripts/generate_files.py" and follow camisim manual.
+
+Once the directories are fully prepared, the following command can be used (in the AMR directory) to generate the read libraries:
+```
+snakemake -c8 population_*/reads_1.fastq --use-conda
+```
 
 ## Allignemnt
 
 The allignment is the procedure that associates the read libraries to the references from CARD and WildCARD. This procedure is handled by the software rgi in its bwt mode. The command used to run the allignment is reported in the rule "rgi_bowtie2" and requires as input the read libraries resulting from the grneration part. Rgi requires to set up an envoirment that include the borrows weeler transform of the reference database. This procedure can be performed justo once for all, usually if is the firt time running the pipeline. If it is required, the rule "rgi_bowtie2" calls the rule "rgi_env_setup" that contains the rgi commands used in order to prepare this envoirment.
+
+To obtain the perform the allignmet, the following command can be used (in the AMR directory) to generate the read libraries:
+```
+snakemake -c8 population_*/bwt_out/bwt.allele_mapping_data.json --use-conda
+```
 
 ## Machine learning
 

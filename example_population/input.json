@@ -1,5 +1,5 @@
 {
-	"simulation_directory": "GLOBAL/PATH/TO_THE_CLONED_DIRECTORY/AMR/population_14",
+	"simulation_directory": "GLOBAL/PATH/TO_THE_CLONED_DIRECTORY/AMR/example_population",
 	"seed": "1",
 	"max_processor": "8",
 	"output_directory": "example_population/camisim_out",

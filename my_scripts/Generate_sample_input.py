@@ -8,20 +8,20 @@ Created on Thu Nov 10 17:34:05 2022
 import json
 from numpy import random
 
-def generate_input_tsv(input_name, Strain_name, Metadata_path, Resistance_percentage, Other_genomes_names = []):
-	species_space = 1 / (len(Other_genomes_names)+1)
+def generate_input_tsv(input_name, Strain_name, Metadata_path, Resistance_percentage, Other_genomes_path = []):
+	species_space = 1 / (len(Other_genomes_path)+1)
 	with open(input_name, 'w') as tab:
 		with open(Metadata_path+"_S.json", 'r') as S, open(Metadata_path+"_R.json", 'r') as R: 
 			print("Genome_ID\tSpecies_Name\tAbundance\tPATRIC_ID\tAntibiotic\tPhenotype\tGenome_length\tNovelty_category\tGenome_file", file = tab)
 			Su, Re = json.load(S), json.load(R)
 			print(Su["Genome_ID"]+"\t"+Su["Species_Name"]+"\t"+str(round(species_space*(1 - Resistance_percentage),5))+"\t"+Su["PATRIC_ID"]+"\t"+Su["Antibiotic"]+"\t"+Su["Phenotype"]+"\t"+Su["Genome_length"]+"\t"+Su["Novelty_category"]+"\t"+Strain_name+"_S.fasta", file=tab)
 			print(Re["Genome_ID"]+"\t"+Re["Species_Name"]+"\t"+str(species_space*Resistance_percentage)+"\t"+Re["PATRIC_ID"]+"\t"+Re["Antibiotic"]+"\t"+Re["Phenotype"]+"\t"+Re["Genome_length"]+"\t"+Re["Novelty_category"]+"\t"+Strain_name+"_R.fasta", file=tab)
-		for names in Other_genomes_names:
-			with open(path, 'r') as O:
+		for names in Other_genomes_path:
+			with open(names, 'r') as O:
 				Ot = json.load(O)
-				print(Ot["Genome_ID"]+"\t"+Ot["Species_Name"]+"\t"+str(species_space*Resistance_percentage)+"\t"+Ot["PATRIC_ID"]+"\t"+Ot["AntibioticPhenotype"]+"\t"+Ot["Genome_length"]+"\t"+Ot["Novelty_category"]+"\t"+names, file=tab)
+				print(Ot["Genome_ID"]+"\t"+Ot["Species_Name"]+"\t"+str(species_space*Resistance_percentage)+"\t"+Ot["PATRIC_ID"]+"\t"+Ot["AntibioticPhenotype"]+"\t"+Ot["Genome_length"]+"\t"+Ot["Novelty_category"]+"\t"+names.split("Metadata_")[1], file=tab)
 
 how_many_samples = 20
 distribuzione = random.uniform(low=0, high=1, size=how_many_samples)
 for i in range(how_many_samples):
-	generate_input_tsv("input_p"+str(i), "Aureus","population_prova_0/genomes/Metadata_Aureus", round(distribuzione[i],5))
+	generate_input_tsv("input_p"+str(i), "Aureus","population_1/genomes/Metadata_Aureus", round(distribuzione[i],5))

@@ -9,36 +9,47 @@ Created on Sat Jun 18 14:57:20 2022
 import os
 import json
 import pandas as pd
+import modin.pandas as PD
 import numpy as np
 import matplotlib.pyplot as plt
 import statistics
 from os.path import isfile, join
+from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import ElasticNet
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.ensemble import AdaBoostRegressor
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import cross_val_predict
 from sklearn.model_selection import cross_validate
 from sklearn.model_selection import LeaveOneOut
-from sklearn.ensemble import AdaBoostClassifier
+
 from sklearn.model_selection import train_test_split
 
 average_read_length = 170
 
-def read_kmer(kmer_dir):
+def read_kmer(popolazioni):
 	"""This function reads the output of kmc_count
 	The rest of the analysis is not already supported for this kind of data
 	"""
-	files = [f for f in os.listdir(kmer_dir) if isfile(join(kmer_dir, f))]
-	kmer_collection_of_samples = {}
-	for F in files:
-		with open(join(kmer_dir, F), mode = "r") as f:
-			kmer_collection_of_samples = pd.read_csv(f, sep='\t')
-	return kmer_collection_of_samples
+	kmers = {}
+	for P in popolazioni:
+		with open(P+"/kmc_out/kmer_count_1.txt", mode = "r") as uno, open(P+"/kmc_out/kmer_count_2.txt", mode = "r") as due:
+			Uno = pd.read_csv(uno, sep='\t', index_col=0)
+			Due = pd.read_csv(due, sep='\t', index_col=0)
+			Tot = pd.concat([Uno, Due], axis = 1).fillna(0)
+			Sum = Tot.sum(axis=1)
+			Tot = pd.concat([Tot, Sum], axis=1)
+			Tot.columns = ["Forward", "Backward", "Sum"]
+		kmers[P] = Tot.to_dict()["Sum"]
+	Return = pd.DataFrame.from_dict(kmers, orient="index").fillna(0)
+	return Return
 	
 
-def read_bwt_2(bwt_dir):
+def read_bwt_2(popolazioni):
 	"""Read the output of rgi
 	Paramethers:
 		bwt_dir: the path to the directory where the files to be read are stored
@@ -46,10 +57,9 @@ def read_bwt_2(bwt_dir):
 		a two dimensional dictionary: at first level we have a sequence of sample_name:resistome
 		each resistome have the structure ARO_identity:FPKB_estimated_abundance
 	"""
-	files = [f for f in os.listdir(bwt_dir) if isfile(join(bwt_dir, f))]
 	resistomes = {}
-	for F in files:
-		with open(join(bwt_dir, F), mode = "r") as f:
+	for P in popolazioni:
+		with open(P+"/bwt_out/bwt.allele_mapping_data.json", mode = "r") as f:
 			dati_ = json.load(f)
 			dati = [di for di in dati_ if isinstance(di, dict)]
 			R={}
@@ -58,11 +68,12 @@ def read_bwt_2(bwt_dir):
 					R[str(aro["aro_accession"])] += int(aro["reads"]["all"]) * average_read_length / int(aro["reference"]["sequence_length"])
 				else:
 					R[str(aro["aro_accession"])] = int(aro["reads"]["all"]) * average_read_length / int(aro["reference"]["sequence_length"])
-			resistomes[F.split(".")[0]] = pd.DataFrame.from_dict(R, orient='index', columns=["FPKB"])
-			print(join(bwt_dir, F) + " ha saltato " + str(len(dati_)-len(dati)) + " entrate su " + str(len(dati_)))
-	return resistomes
+			resistomes[P] = R
+#			print(P + " ha saltato " + str(len(dati_)-len(dati)) + " entrate su " + str(len(dati_)))
+	Return = pd.DataFrame.from_dict(resistomes, orient="index").fillna(0)
+	return Return
 
-def read_metadata(meta_dir, key):
+def read_metadata(popolazioni):
 	"""Read the metadata file
 	Paramethers:
 		meta_dir:
@@ -74,12 +85,10 @@ def read_metadata(meta_dir, key):
 	Returns:
 		A dictionary with the structure ARO_identity: phenotype
 	"""
-	files = [f for f in os.listdir(meta_dir) if isfile(join(meta_dir, f))]
 	metadata = {}
-	for F in files:
-		with open(join(meta_dir, F), mode = "r") as f:
-			M = json.load(f)
-			metadata[F.split(".")[0]] = M[list(M.keys())[0]][key]
+	for P in popolazioni:
+		M_pop = pd.read_csv(P+"/input.tsv", sep="\t")
+		metadata[P] = M_pop
 	return metadata
 
 def filter_sparcity_median(dataset, sparsity_filter, median_filter, plot = False, plot_zoom = 1):
@@ -90,9 +99,9 @@ def filter_sparcity_median(dataset, sparsity_filter, median_filter, plot = False
 	"""
 	new = dataset.copy()
 	if plot:
-		y = dataset.drop("phenotype", axis=1).median(axis=0)
+		y = dataset.median(axis=0)
 		y = [i+0.1 if i < 0.1 else i for i in list(y)]
-		x = [(c_data == 0).astype(int).sum()*100/(new.shape[0]-1) for (c_name, c_data) in new.drop("phenotype", axis=1).iteritems()]
+		x = [(c_data == 0).astype(int).sum()*100/(new.shape[0]-1) for (c_name, c_data) in new.iteritems()]
 		colors = np.random.rand(3)
 		somma = dataset.drop("phenotype", axis=1).sum(axis = 0)/50
 		somma = [l*plot_zoom for l in list(somma)]
@@ -104,22 +113,22 @@ def filter_sparcity_median(dataset, sparsity_filter, median_filter, plot = False
 		plt.plot([0,100],[median_filter,median_filter], color = "red") #median
 		plt.plot([sparsity_filter,sparsity_filter],[0,1500], color = "red") #sparsity
 		plt.show()		
-	for (c_name, c_data) in new.drop("phenotype", axis=1).iteritems():
+	for (c_name, c_data) in new.iteritems():
 		zeros_percent = (c_data == 0).astype(int).sum()*100/new.shape[0]
 		if zeros_percent > sparsity_filter:
 			new = new.drop(c_name, axis=1)
-	median = new.drop("phenotype", axis=1).median(axis=0)
+	median = new.median(axis=0)
 	median = median < median_filter
-	for (c_name, c_data) in new.drop("phenotype", axis=1).iteritems():
+	for (c_name, c_data) in new.iteritems():
 		if median[c_name]:
 			new = new.drop(c_name, axis=1)
 	print("filter_prevalence got read of " + str(dataset.shape[1]-new.shape[1]) + " columns over " +str(dataset.shape[1]))
-	aro_left_out = [k for k in dataset.drop("phenotype", axis = 1).columns if k not in new.columns]
+	aro_left_out = [k for k in dataset.columns if k not in new.columns]
 	left_out = dataset[aro_left_out]
-	print("È stato rimosso " + str(left_out.to_numpy().sum() / dataset.drop("phenotype", axis = 1).to_numpy().sum()) + " del contenuto dei resistomi")
+	print("È stato rimosso " + str(left_out.to_numpy().sum() / dataset.to_numpy().sum()) + " del contenuto dei resistomi")
 	X = list(dataset.index)
-	Yprima = list(dataset.drop("phenotype", axis=1).sum(axis = 1))
-	Ydopo = list(new.drop("phenotype", axis=1).sum(axis = 1))
+	Yprima = list(dataset.sum(axis = 1))
+	Ydopo = list(new.sum(axis = 1))
 	X_axis = np.arange(len(X))
 	plt.bar(X_axis - 0.2, Yprima, 0.4, label = 'Before')
 	plt.bar(X_axis + 0.2, Ydopo, 0.4, label = 'After')
@@ -130,18 +139,40 @@ def filter_sparcity_median(dataset, sparsity_filter, median_filter, plot = False
 	plt.show()	
 	return new
 
-def view_database(dataset, view_a_spectrum = None):
+def view_database(dataset, filename, view_a_spectrum = None):
 	"""Produces various plots of the dataset provided as argument and also of a specific sample
 	if "view_a_spectrum" have a reasonable integer value
 	"""
-	V = dataset.drop("phenotype", axis = 1).sum(axis = 1)
+	#PLOT CON LA SOMMA DEI VALORI NELLE COLONNE
+	V = dataset.sum(axis = 1)
 	dic = {a : V[a] for a in V.index.tolist()}
-	dic = dict(sorted(dic.items(), key=lambda item: item[1]))
+	plt.figure(0)
 	plt.bar(dic.keys(),dic.values())
 	plt.xlabel("Samples")
-	plt.ylabel("Resistome integral (FPKB)")
+	plt.ylabel("Sample integral")
 	plt.xticks([])
-	plt.show()
+	plt.savefig("M_learning_images/"+filename+"_Integral.png")
+
+	#SCATTERPLOT SPARSITà E MEDIANA
+	plot_zoom=1
+	y = dataset.median(axis=0)
+	y = [i+0.1 if i < 0.1 else i for i in list(y)]
+	x = [(c_data == 0).astype(int).sum()*100/(dataset.shape[0]-1) for (c_name, c_data) in dataset.iteritems()]
+	colors = np.random.rand(3)
+	somma = dataset.sum(axis = 0)/50
+	somma = [l*plot_zoom for l in list(somma)]
+	plt.figure(1)
+	#plt.scatter(x, y, s=somma, c=colors, alpha=0.5)
+	plt.scatter(x, y, c=colors, alpha=0.5)
+	plt.yscale("log")
+	plt.ylabel("Median")
+	plt.xlabel("Percentage of sparsity")
+	plt.title("Filtering results")
+	#	plt.plot([0,100],[median_filter,median_filter], color = "red") #median
+	#	plt.plot([sparsity_filter,sparsity_filter],[0,1500], color = "red") #sparsity
+	plt.savefig("M_learning_images/"+filename+"_Scatter.png")
+	
+	#BARPLOT DI UN SINGOLO GRAFICO
 	if isinstance(view_a_spectrum, int):
 		V = dataset.drop("phenotype", axis = 1)
 		dic_2 = V.iloc[view_a_spectrum,:].to_dict()
@@ -200,7 +231,7 @@ def std_scale(dataset):
 	return nuovo
 	
 
-def create_train_test(dict_dict, phenotypes, sparsity=70, median=5):
+def preprocessing(dataframe, sparsity=70, median=5):
 	"""Creates the database in a format usefull for machine learning
 	Paramethers:
 		dict_dict: a dictionary containing other dictionary, this argument is supposed to be the returning value from read_bwt
@@ -214,131 +245,123 @@ def create_train_test(dict_dict, phenotypes, sparsity=70, median=5):
 		-PCA
 	Each of the steps of this function are independent and can be commented it is required not to have them
 	"""
-	ind=[]
-	ll = []
-	for a in dict_dict:
-		ind += list(dict_dict[a].index)
-	ind = list(set(ind))
-	for d in dict_dict:
-		new_data = {}
-		for i in ind:
-			if i in dict_dict[d].index:
-				new_data[i] = dict_dict[d].loc[i,"FPKB"]
-			else:
-				new_data[i] = 0
-		l = []
-		l.append(d)
-		for i in ind:
-			l.append(new_data[i])
-		l.append(phenotypes[d])
-		ll.append(l)
-	dataset = pd.DataFrame(ll, columns=["population"]+ind+["phenotype"])
-	dataset.set_index("population", inplace=True)
 #	view_database(dataset)
 #FILTERING FOR PREVALENCE #toglgie quelle con occorrenza di zeri maggiore del tot%
-	dataset = filter_sparcity_median(dataset, sparsity, median, plot = True, plot_zoom=15)
+#	dataframe = filter_sparcity_median(dataframe, sparsity, median, plot = False, plot_zoom=15)
 #	view_database(dataset, 2)
 #NORMALIZE #normalizza con center og rateo
-	dataset = CLR_normalization(dataset)
+#	dataset = CLR_normalization(dataset)
 #MAKING STANDARDIZATION
-	dataset = std_scale(dataset)
+#	dataset = std_scale(dataset)
 #MAKING PCA #il secondo argomento standard determina quante componenti tiene, in questo caso tutte
-	dataset = PCA_maker(dataset, plots=False)
-	return dataset
+#	dataset = PCA_maker(dataset, plots=False)
+	return dataframe
 
 def loo(classifier, resistome, phenotype, plot = False, linear = False):
-	scores = cross_val_score(classifier, resistome, phenotype, cv=LeaveOneOut(), n_jobs=-1)
-	results = list(cross_val_predict(classifier, resistome, phenotype, cv=LeaveOneOut(), n_jobs=-1))
-	estimators = cross_validate(classifier, resistome, phenotype, cv=LeaveOneOut(), n_jobs=-1, return_estimator=True)
-	if linear:
-		feat_imps = [i.coef_[0] for i in estimators["estimator"]]
-	else:
-		feat_imps = [i.feature_importances_ for i in estimators["estimator"]]
-	feat_imps = pd.DataFrame(feat_imps, columns=resistome.columns)
-	feat_imps = {"Feature importance" : feat_imps.mean(axis=0),"Standard deviation": feat_imps.std(axis=0)}
-	if plot:
-		plt.hist(scores)
-		plt.xlabel("Scores")
-		plt.ylabel("Abundance")
-		plt.show()
-		X_, Y_ = [i.split(" ")[1] for i in feat_imps["Feature importance"].index], feat_imps["Feature importance"].values
-		if linear:
-			Y_ = [abs(iii) for iii in Y_]
-		plt.bar(X_, Y_)
-		plt.xlabel('PCA component')
-		plt.ylabel('Feature importance')
-		plt.errorbar(X_, Y_, feat_imps["Standard deviation"].values, fmt=' ',color='Black')
-		plt.show()
-	false_s , false_r = 0,0
-	for a in range(len(phenotype)):
-		if phenotype[a] == "resistant" and results[a] == "susceptible":
-			false_s +=1
-		elif phenotype[a] == "susceptible" and results[a] == "resistant":
-			false_r +=1
-	print("Leave one out report:")
-	print("False resistant = " + str(false_r))
-	print("False susceptible = " + str(false_s))
-	print("Scores = " + str(scores))
-	print("Score avrage " + str(sum(scores)/len(scores)) + ", variance " + str(np.var(scores)) + '\n')
-	return {"Scores":scores, "Feature importance" : feat_imps, "Falsi suscettibili":false_s, "Falsi resistenti":false_r}
+	predictions = list(cross_val_predict(classifier, resistome, phenotype, cv=LeaveOneOut(), n_jobs=-1))
+	CROSS = cross_validate(classifier, resistome, phenotype, cv=LeaveOneOut(), n_jobs=-1, return_estimator=True)
+	#if linear:
+	#	feat_imps = [i.coef_[0] for i in models["estimator"]]
+	#else:
+	#	feat_imps = [i.feature_importances_ for i in models["estimator"]]
+	#feat_imps = pd.DataFrame(feat_imps, columns=resistome.columns)
+	#feat_imps = {"Feature importance" : feat_imps.mean(axis=0),"Standard deviation": feat_imps.std(axis=0)}
+	#if plot:
+	#	plt.hist(scores)
+	#	plt.xlabel("Scores")
+	#	plt.ylabel("Abundance")
+	#	plt.show()
+	#	X_, Y_ = [i.split(" ")[1] for i in feat_imps["Feature importance"].index], feat_imps["Feature importance"].values
+	#	if linear:
+	#		Y_ = [abs(iii) for iii in Y_]
+	#	plt.bar(X_, Y_)
+	#	plt.xlabel('PCA component')
+	#	plt.ylabel('Feature importance')
+	#	plt.errorbar(X_, Y_, feat_imps["Standard deviation"].values, fmt=' ',color='Black')
+	#	plt.show()
+	#false_s , false_r = 0,0
+	#for a in range(len(phenotype)):
+	#	if phenotype[a] == "resistant" and results[a] == "susceptible":
+	#		false_s +=1
+	#	elif phenotype[a] == "susceptible" and results[a] == "resistant":
+	#		false_r +=1
+	#print("Leave one out report:")
+	#print("False resistant = " + str(false_r))
+	#print("False susceptible = " + str(false_s))
+	#print("Scores = " + str(scores))
+	#print("Score avrage " + str(sum(scores)/len(scores)) + ", variance " + str(np.var(scores)) + '\n')
+	return {"Scores":CROSS["test_score"], "Predictions": predictions, "Models": CROSS["estimator"], "Feature importance" : "DA IMPLEMENTARE"}
 
 def cv5(classifier, resistome, phenotype, plot = False, linear = False):
-	scores = cross_val_score(classifier, resistome, phenotype, cv=5, n_jobs=-1)
-	results = list(cross_val_predict(classifier, resistome, phenotype, cv=5, n_jobs=-1))
-	estimators = cross_validate(classifier, resistome, phenotype, cv=5, n_jobs=-1, return_estimator=True)
-	if linear:
-		feat_imps = [i.coef_[0] for i in estimators["estimator"]]
-	else:
-		feat_imps = [i.feature_importances_ for i in estimators["estimator"]]
-	feat_imps = pd.DataFrame(feat_imps, columns=resistome.columns)
-	feat_imps = {"Feature importance" : feat_imps.mean(axis=0),"Standard deviation": feat_imps.std(axis=0)}
-	if plot:
-		plt.hist(scores)
-		plt.xlabel("Scores")
-		plt.ylabel("Abundance")
-		plt.show()
-		X_, Y_ = [i.split(" ")[1] for i in feat_imps["Feature importance"].index], feat_imps["Feature importance"].values
-		if linear:
-			Y_ = [abs(iii) for iii in Y_]
-		plt.bar(X_, Y_)
-		plt.xlabel('PCA component')
-		plt.ylabel('Feature importance')
-		plt.errorbar(X_, Y_, feat_imps["Standard deviation"].values, fmt=' ',color='Black')
-		plt.show()
-	false_s , false_r = 0,0
-	for a in range(len(phenotype)):
-		if phenotype[a] == "resistant" and results[a] == "susceptible":
-			false_s +=1
-		elif phenotype[a] == "susceptible" and results[a] == "resistant":
-			false_r +=1
-	print("5 fold report:")
-	print("False resistant = " + str(false_r))
-	print("False susceptible = " + str(false_s))
-	print("Scores = " + str(scores))
-	print("Score avrage " + str(sum(scores)/len(scores)) + ", variance " + str(np.var(scores)) + '\n')
-	return {"Scores":scores, "Feature importance" : feat_imps, "Falsi suscettibili":false_s, "Falsi resistenti":false_r}
-	
+	predictions = list(cross_val_predict(classifier, resistome, phenotype, cv=5, n_jobs=-1))
+	CROSS = cross_validate(classifier, resistome, phenotype, cv=5, n_jobs=-1, return_estimator=True)
+	#if linear:
+	#	feat_imps = [i.coef_[0] for i in models["estimator"]]
+	#else:
+	#	feat_imps = [i.feature_importances_ for i in models["estimator"]]
+	#feat_imps = pd.DataFrame(feat_imps, columns=resistome.columns)
+	#feat_imps = {"Feature importance" : feat_imps.mean(axis=0),"Standard deviation": feat_imps.std(axis=0)}
+	#if plot:
+	#	plt.hist(scores)
+	#	plt.xlabel("Scores")
+	#	plt.ylabel("Abundance")
+	#	plt.show()
+	#	X_, Y_ = [i.split(" ")[1] for i in feat_imps["Feature importance"].index], feat_imps["Feature importance"].values
+	#	if linear:
+	#		Y_ = [abs(iii) for iii in Y_]
+	#	plt.bar(X_, Y_)
+	#	plt.xlabel('PCA component')
+	#	plt.ylabel('Feature importance')
+	#	plt.errorbar(X_, Y_, feat_imps["Standard deviation"].values, fmt=' ',color='Black')
+	#	plt.show()
+	#false_s , false_r = 0,0
+	#for a in range(len(phenotype)):
+	#	if phenotype[a] == "resistant" and results[a] == "susceptible":
+	#		false_s +=1
+	#	elif phenotype[a] == "susceptible" and results[a] == "resistant":
+	#		false_r +=1
+	#print("5 fold report:")
+	#print("False resistant = " + str(false_r))
+	#print("False susceptible = " + str(false_s))
+	#print("Scores = " + str(scores))
+	#print("Score avrage " + str(sum(scores)/len(scores)) + ", variance " + str(np.var(scores)) + '\n')
+	return {"Scores":CROSS["test_score"], "Predictions and phenotype": [[predictions[i], phenotype[i]] for i in range(len(predictions))], "Models": CROSS["estimator"], "Feature importance" : "DA IMPLEMENTARE"}
 
-dati = read_bwt_2("bwt_plot")
-#dati = read_bwt_2("bwt_4d")
-phenotipi = read_metadata("metadata_plot", "Phenotype")
-#phenotipi = read_metadata("metadata_4d", "Phenotype")
-Dati = create_train_test(dati, phenotipi)
-Resistome = Dati.drop("phenotype", axis=1)
-Phenotype = Dati["phenotype"]
-Phenotype_bool = pd.Series({k : (1 if Phenotype[k] == "resistant" else 0) for k in Phenotype.keys()})
 
-print("\nForest classifier:")
-Forest = RandomForestClassifier(random_state=0)
-Forest_loo_scores = loo(Forest, Resistome, Phenotype, plot=True)
-Forest_cv5_scores = cv5(Forest, Resistome, Phenotype, plot=True)
 
-print("\nAdaBoost classifier:")
-Ada = AdaBoostClassifier(n_estimators=100, random_state=0)
-Ada_loo_scores = loo(Ada, Resistome, Phenotype, plot=True)
-Ada_cv5_scores = cv5(Ada, Resistome, Phenotype, plot=True)
+pop_1_specie_random_resistance = ["population_0","population_1","population_2","population_3","population_4","population_5","population_6","population_7","population_8","population_9","population_10","population_11","population_12","population_13","population_14","population_15","population_16","population_17","population_18","population_19"]
+pop_4_specie_random_resistance = ["population_20","population_21","population_22","population_23","population_24","population_25","population_26","population_27","population_28","population_29","population_30","population_31","population_32","population_33","population_34","population_35","population_36","population_37","population_38","population_39"]
+pop_1_specie_si_no_resistance = ["population_40","population_41","population_42","population_43","population_44","population_45","population_46","population_47","population_48","population_49","population_50","population_51","population_52","population_53","population_54","population_55","population_56","population_57","population_58","population_59"]
+pop_4_specie_si_no_resistance = ["population_60","population_61","population_62","population_63","population_64","population_65","population_66","population_67","population_68","population_69","population_70","population_71","population_72","population_73","population_74","population_75","population_76","population_77","population_78","population_79"]
 
-print("\nLog regression classifier:")
-Log = LogisticRegression(random_state=20, penalty="elasticnet", solver = "saga", l1_ratio=0.5)
-Net_loo_scores = loo(Log, Resistome, Phenotype, plot=True, linear=True)
-Net_cv5_scores = cv5(Log, Resistome, Phenotype, plot=True, linear=True)
+Data_bwt = read_bwt_2(pop_1_specie_random_resistance)
+print("Data_bwt created")
+Data_bwt = preprocessing(Data_bwt)
+Data_kmer = read_kmer(pop_1_specie_random_resistance)
+print("Data_kmer created")
+Metadata = read_metadata(pop_1_specie_random_resistance)
+
+view_database(Data_bwt, "FPKB_sum_per_sample")
+view_database(Data_kmer, "Kmer_abundance_per_sample")
+
+for m in Metadata:
+	Metadata[m]["Phenotype"].replace(["susceptible", "resistant"], [0,1], inplace=True)
+R_abundances = pd.DataFrame.from_dict({pop_name : float(Metadata[pop_name][["Abundance", "Phenotype"]].prod(axis=1).sum(axis=0)) for pop_name in Metadata}, orient="index")
+r_abundances = [float(Metadata[pop_name][["Abundance", "Phenotype"]].prod(axis=1).sum(axis=0)) for pop_name in Metadata]
+
+print("\nElastic net linear regression, results in 'El_cv5_result' varible")
+El_1 = ElasticNet(alpha=1.0, l1_ratio=0.5)
+El_cv5_results_bwt= cv5(El_1, Data_bwt, r_abundances)
+El_2 = ElasticNet(alpha=1.0, l1_ratio=0.5, max_iter=1000000, tol=0.005)
+El_cv5_results_kmer= cv5(El_2, Data_kmer, r_abundances)
+
+print("\nRandom forest regression, results in 'Forest_cv5_results' variable")
+Forest_1 = RandomForestRegressor(random_state = 0)
+Forest_cv5_results_bwt = cv5(Forest_1, Data_bwt, r_abundances)
+Forest_2 = RandomForestRegressor(random_state = 0)
+Forest_cv5_results_kmer= cv5(Forest_2, Data_kmer, r_abundances)
+
+print("\nAda boost regression, results in 'Ada_cv5_results' varible")
+Ada = AdaBoostRegressor(n_estimators=100, random_state=0)
+Ada_cv5_results_bwt = cv5(Ada, Data_bwt, r_abundances)
+Ada_cv5_results_kmer= cv5(Ada, Data_kmer, r_abundances)

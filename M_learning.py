@@ -90,51 +90,10 @@ def read_metadata(popolazioni):
 		metadata[P] = M_pop
 	[metadata[m]["Phenotype"].replace(["susceptible", "resistant"], [0,1], inplace=True) for m in metadata]
 	r_abundances = [float(metadata[pop_name][["Abundance", "Phenotype"]].prod(axis=1).sum(axis=0)) for pop_name in metadata]
+	if set(r_abundances) == {0,0.25}:
+		l=[0 if x == 0 else 1 for x in r_abundances]
+		r_abundances = l
 	return {"Metadata":metadata, "Abundances":r_abundances}
-
-def view_database(dataset, filename, view_a_spectrum = None):
-	"""Produces various plots of the dataset provided as argument and also of a specific sample
-	if "view_a_spectrum" have a reasonable integer value
-	"""
-	#PLOT CON LA SOMMA DEI VALORI NELLE COLONNE
-	V = dataset.sum(axis = 1)
-	dic = {a : V[a] for a in V.index.tolist()}
-	plt.figure(0)
-	plt.bar(dic.keys(),dic.values())
-	plt.xlabel("Samples")
-	plt.ylabel("Sample integral")
-	plt.xticks([])
-	plt.savefig("M_learning_images/"+filename+"_Integral.png")
-
-	#SCATTERPLOT SPARSITà E MEDIANA
-	plot_zoom=1
-	y = dataset.median(axis=0)
-	y = [i+0.1 if i < 0.1 else i for i in list(y)]
-	x = [(c_data == 0).astype(int).sum()*100/(dataset.shape[0]-1) for (c_name, c_data) in dataset.iteritems()]
-	colors = np.random.rand(3)
-	somma = dataset.sum(axis = 0)/50
-	somma = [l*plot_zoom for l in list(somma)]
-	plt.figure(1)
-	#plt.scatter(x, y, s=somma, c=colors, alpha=0.5)
-	plt.scatter(x, y, c=colors, alpha=0.5)
-	plt.yscale("log")
-	plt.ylabel("Median")
-	plt.xlabel("Percentage of sparsity")
-	plt.title("Filtering results")
-	#	plt.plot([0,100],[median_filter,median_filter], color = "red") #median
-	#	plt.plot([sparsity_filter,sparsity_filter],[0,1500], color = "red") #sparsity
-	plt.savefig("M_learning_images/"+filename+"_Scatter.png")
-	
-	#BARPLOT DI UN SINGOLO GRAFICO
-	if isinstance(view_a_spectrum, int):
-		V = dataset.drop("phenotype", axis = 1)
-		dic_2 = V.iloc[view_a_spectrum,:].to_dict()
-		dic_2 = dict(sorted(dic_2.items(), key=lambda item: item[1]))
-		plt.bar(dic_2.keys(),dic_2.values())
-		plt.xlabel("ARO indentities")
-		plt.ylabel("Abundance (FPKB)")
-		plt.xticks([])
-		plt.show()
 
 def cv5(classifier, resistome, phenotype):
 	predictions = list(cross_val_predict(classifier, resistome, phenotype, cv=5, n_jobs=-1))
@@ -191,10 +150,11 @@ four_random = ["population_20","population_21","population_22","population_23","
 one_si_no = ["population_40","population_41","population_42","population_43","population_44","population_45","population_46","population_47","population_48","population_49","population_50","population_51","population_52","population_53","population_54","population_55","population_56","population_57","population_58","population_59"]
 four_si_no = ["population_60","population_61","population_62","population_63","population_64","population_65","population_66","population_67","population_68","population_69","population_70","population_71","population_72","population_73","population_74","population_75","population_76","population_77","population_78","population_79"]
 
-Data_bwt = read_bwt_2(four_random)
-print("Data_bwt created")
-#Data_kmer = read_kmer_parallel(pop_1_specie_si_no_resistance)
-print("Data_kmer created")
-Metadata = read_metadata(four_random)
-
-regression(Data_bwt, Metadata["Abundances"], "4_random_bwt")
+regression(read_bwt_2(one_random), read_metadata(one_random)["Abundances"], "1_random_bwt")
+regression(read_bwt_2(four_random), read_metadata(four_random)["Abundances"], "4_random_bwt")
+regression(read_kmer_2(one_random), read_metadata(one_random)["Abundances"], "1_random_kmer")
+regression(read_kmer_2(four_random), read_metadata(four_random)["Abundances"], "4_random_kmer")
+classification(read_bwt_2(one_si_no), read_metadata(one_si_no)["Abundances"], "1_si_no_bwt")
+classification(read_bwt_2(four_si_no), read_metadata(four_si_no)["Abundances"], "4_si_no_bwt")
+classification(read_kmer_2(one_si_no), read_metadata(one_si_no)["Abundances"], "1_si_no_kmer")
+classification(read_kmer_2(four_si_no), read_metadata(four_si_no)["Abundances"], "4_si_no_kmer")

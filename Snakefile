@@ -6,6 +6,17 @@ max_count = 120000000
 wild_card_version = "4.0.0"
 card_version = "3.2.5"
 
+Populations = ["population_0", "population_1", "population_2", "population_3", "population_4", "population_5", "population_6", "population_7", "population_8", "population_9", "population_10", "population_11", "population_12", "population_13", "population_14", "population_15", "population_16", "population_17", "population_18", "population_19", "population_20", "population_21", "population_22", "population_23", "population_24", "population_25", "population_26", "population_27", "population_28", "population_29", "population_30", "population_31", "population_32", "population_33", "population_34", "population_35", "population_36", "population_37", "population_38", "population_39", "population_40", "population_41", "population_42", "population_43", "population_44", "population_45", "population_46", "population_47", "population_48", "population_49", "population_50", "population_51", "population_52", "population_53", "population_54", "population_55", "population_56", "population_57", "population_58", "population_59", "population_60", "population_61", "population_62", "population_63", "population_64", "population_65", "population_66", "population_67", "population_68", "population_69", "population_70", "population_71", "population_72", "population_73", "population_74", "population_75", "population_76", "population_77", "population_78", "population_79", "population_80", "population_81", "population_82", "population_83", "population_84", "population_85", "population_86", "population_87", "population_88", "population_89", "population_90", "population_91", "population_92", "population_93", "population_94", "population_95", "population_96", "population_97", "population_98", "population_99"]
+#Populations = ["population_7","population_20"]
+rule terminated:
+	input:
+				alignments = expand("{pop}/single_alignment", pop=Populations),
+				kmer_counts = expand("{pop}/single_kmer_count", pop=Populations)
+	output:
+		"TERMINATED"
+	shell:
+		"touch TERMINATED"
+
 rule population_set_up:
 	input:
 		i_1 = "{sample}/input.json",
@@ -44,7 +55,8 @@ rule kmer_count_paired:
 		S2 = "{sample}/reads_2.fastq"
 	output:
 		"{sample}/kmc_out/kmer_count_1.txt",
-		"{sample}/kmc_out/kmer_count_2.txt"
+		"{sample}/kmc_out/kmer_count_2.txt",
+		"{sample}/paired_kmer_count"
 	conda: "env.yaml"
 	threads: 20
 	params:
@@ -59,13 +71,15 @@ rule kmer_count_paired:
 		
 		kmc -k{k_mer_size} -m{params.ram} -t{threads} -cs{max_count} -cx{max_count} {input.S2} {wildcards.sample}/kmc_out/k_2 {wildcards.sample}/kmc_out/kmc_temp
 		kmc_tools transform {wildcards.sample}/kmc_out/k_2 dump {wildcards.sample}/kmc_out/kmer_count_2.txt
+		touch {wildcards.sample}/paired_kmer_count
 		"""
 
 rule kmer_count_single:
 	input:
 		S = "{sample}/reads.fastq"
 	output:
-		"{sample}/kmc_out/kmer_count.txt"
+		"{sample}/kmc_out/kmer_count.txt",
+		"{sample}/single_kmer_count"
 	conda: "env.yaml"
 	threads: 20
 	params:
@@ -77,6 +91,7 @@ rule kmer_count_single:
 		mkdir {wildcards.sample}/kmc_out/kmc_temp
 		kmc -k{k_mer_size} -m{params.ram} -t{threads} -cs{max_count} -cx{max_count} {input.S} {wildcards.sample}/kmc_out/K {wildcards.sample}/kmc_out/kmc_temp
 		kmc_tools transform {wildcards.sample}/kmc_out/K dump {wildcards.sample}/kmc_out/kmer_count.txt
+		touch {wildcards.sample}/single_kmer_count
 		"""
 
 rule rgi_bowtie2_paired:

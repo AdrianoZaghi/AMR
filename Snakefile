@@ -10,8 +10,10 @@ Populations = ["population_0", "population_1", "population_2", "population_3", "
 #Populations = ["population_7","population_20"]
 rule terminated:
 	input:
-				alignments = expand("{pop}/single_alignment", pop=Populations),
-				kmer_counts = expand("{pop}/single_kmer_count", pop=Populations)
+#				alignments = expand("{pop}/single_alignment", pop=Populations),
+#				kmer_counts = expand("{pop}/single_kmer_count", pop=Populations),
+				single_end_reads = expand("{pop}/reads.fastq", pop=Populations)
+#				pop_configurations = expand("{pop}/config.ini", pop=Populations)
 	output:
 		"TERMINATED"
 	shell:
@@ -20,8 +22,7 @@ rule terminated:
 rule population_set_up:
 	input:
 		i_1 = "{sample}/input.json",
-		i_2 = "{sample}/input.tsv",
-		g = "{sample}/genomes"
+		i_2 = "{sample}/input.tsv"
 	output:
 		"{sample}/config.ini"
 	shell:

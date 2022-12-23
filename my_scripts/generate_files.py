@@ -85,7 +85,7 @@ genome_to_id_path = simul_dir + genome_to_id_name
 with open(genome_to_id_path, 'w') as genome_to_id_file:
 	wrt_genome_to_id = csv.writer(genome_to_id_file, delimiter='\t')
 	for index in range(len(genome_ID_list)):
-		wrt_genome_to_id.writerow([genome_ID_list[index], str(simul_dir+'/genomes/'+genome_filename_list[index])])
+		wrt_genome_to_id.writerow([genome_ID_list[index], str(simul_dir.split("population")[0]+'genomes/'+genome_filename_list[index])])
 
 ######################## Write configuration file ###########################
 

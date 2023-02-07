@@ -1,4 +1,3 @@
-bwt
-metadata
-population*
 rgi*
+.snakemake
+population*

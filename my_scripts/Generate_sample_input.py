@@ -6,25 +6,51 @@ Created on Thu Nov 10 17:34:05 2022
 @author: utente
 """
 import json
-from numpy import random
+import os
 
-def generate_input_tsv(input_name, Strain_name, Metadata_path, Resistance_percentage, Other_genomes_path = []):
-	species_space = 1 / (len(Other_genomes_path)+1)
-	with open(input_name, 'w') as tab:
-		with open(Metadata_path+"_S.json", 'r') as S, open(Metadata_path+"_R.json", 'r') as R: 
-			print("Genome_ID\tSpecies_Name\tAbundance\tPATRIC_ID\tAntibiotic\tPhenotype\tGenome_length\tNovelty_category\tGenome_file", file = tab)
-			Su, Re = json.load(S), json.load(R)
-			print(Su["Genome_ID"]+"\t"+Su["Species_Name"]+"\t"+str(round(species_space*(1 - Resistance_percentage),5))+"\t"+Su["PATRIC_ID"]+"\t"+Su["Antibiotic"]+"\t"+Su["Phenotype"]+"\t"+Su["Genome_length"]+"\t"+Su["Novelty_category"]+"\t"+Strain_name+"_S.fasta", file=tab)
-			print(Re["Genome_ID"]+"\t"+Re["Species_Name"]+"\t"+str(species_space*Resistance_percentage)+"\t"+Re["PATRIC_ID"]+"\t"+Re["Antibiotic"]+"\t"+Re["Phenotype"]+"\t"+Re["Genome_length"]+"\t"+Re["Novelty_category"]+"\t"+Strain_name+"_R.fasta", file=tab)
-		for names in Other_genomes_path:
-			with open(names, 'r') as O:
-				Ot = json.load(O)
-				print(Ot["Genome_ID"]+"\t"+Ot["Species_Name"]+"\t"+str(species_space)+"\t"+Ot["PATRIC_ID"]+"\t"+Ot["Antibiotic"]+"\t"+Ot["Phenotype"]+"\t"+Ot["Genome_length"]+"\t"+Ot["Novelty_category"]+"\t"+names.split("Metadata_")[1].split(".")[0]+".fasta", file=tab)
+def generate_input_tsv(Filename, abundance, metadatas):
+	with open(Filename, 'w') as tab:
+		print("Genome_ID\tSpecies_Name\tAbundance\tPATRIC_ID\tAntibiotic\tPhenotype\tGenome_length\tNovelty_category\tGenome_file", file = tab)
+		for i in range(len(abundance)):
+			Ab=abundance[i]
+			if Ab < 1 and Ab > 0:			
+				with open(metadatas[i], 'r') as O:
+					Ot = json.load(O)
+					print(Ot["Genome_ID"]+"\t"+Ot["Species_Name"]+"\t"+str(Ab)+"\t"+Ot["PATRIC_ID"]+"\t"+Ot["Antibiotic"]+"\t"+Ot["Phenotype"]+"\t"+Ot["Genome_length"]+"\t"+"known_strain"+"\t"+Ot["Genome_file"], file=tab)
+			elif Ab > 1:
+				with open(metadatas[i], 'r') as O:
+					Ot = json.load(O)
+					print(Ot["Genome_ID"]+"\t"+Ot["Species_Name"]+"\t"+str(Ab*0.01)+"\t"+Ot["PATRIC_ID"]+"\t"+Ot["Antibiotic"]+"\t"+Ot["Phenotype"]+"\t"+Ot["Genome_length"]+"\t"+"known_strain"+"\t"+Ot["Genome_file"], file=tab)
 
-how_many_samples = 20
-distribuzione_random = random.uniform(low=0, high=1, size=how_many_samples)
-distribuzione_binaria = [1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0]
-distribuzione_de_cesare = [0,0,0,0,0,0.25,0.25,0.25,0.25,0.25,0.5,0.5,0.5,0.5,0.5,0.75,0.75,0.75,0.75,0.75,1,1,1,1,1]
-for i in range(how_many_samples):
-#	generate_input_tsv("input_p"+str(i), "Aureus","population_20/genomes/Metadata_Aureus", round(distribuzione_binaria[i],5), ["population_20/genomes/Metadata_Escherichia.json","population_20/genomes/Metadata_Acineto.json", "population_20/genomes/Metadata_Pseudomosa.json"])
-	generate_input_tsv("input_p"+str(i), "Aureus","population_20/genomes/Metadata_Aureus", round(distribuzione_de_cesare[i],5))
+def generate_input_json(Filename, abundance, processors=8, size=0.01, fragment_size=270, fragment_dev=27):
+	dic = {"simulation_directory":Filename.split("/input.json")[0],
+	"seed":"1",
+	"max_processor":str(processors),
+	"output_directory":Filename.split("/input.json")[0]+"camisim_out",
+	"size":str(size),
+	"fragm_size_mean":str(fragment_size),
+	"fragm_size_std_dev":str(fragment_dev),
+	"number_of_samples":"1",
+	"equally_distributed_strains":"True",
+	"genomes_total":str(sum([a>0 for a in abundance]))}
+	with open(Filename, mode="w") as j:
+		json.dump(dic,j)
+
+Metadata_paths = ["genomes/Aureus_S_metadata.json", "genomes/Aureus_R_metadata.json", "genomes/Coli_metadata.json", "genomes/Pseudomonas_metadata.json", "genomes/Archeobacter_metadata.json"]
+directory_tag = "Train_0"
+abundances=[[27,73,0,0,0],\
+			[86,14,0,0,0],\
+			[92,8,0,0,0],\
+			[38,62,0,0,0],\
+			[37,63,0,0,0],\
+			[14,86,0,0,0],\
+			[80,20,0,0,0],\
+			[28,72,0,0,0],\
+			[32,68,0,0,0],\
+			[75,25,0,0,0]]
+
+for i in range(len(abundances)):
+	path=directory_tag+str(i).zfill(2)
+	os.mkdir(path)
+	generate_input_tsv(path+"/input.tsv", abundances[i], Metadata_paths)
+	generate_input_json(path+"/input.json", abundances[i])

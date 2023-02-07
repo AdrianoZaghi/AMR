@@ -1,18 +1,19 @@
 assembly_K_list = "27,47,67,87,107,127"
 rgi_annotation_alignment_tool = "BLAST"
 k_mer_size = 27
-anno = "2022"
+anno = "2023"
 max_count = 120000000
 wild_card_version = "4.0.0"
 card_version = "3.2.5"
 
-Populations = ["population_0", "population_1", "population_2", "population_3", "population_4", "population_5", "population_6", "population_7", "population_8", "population_9", "population_10", "population_11", "population_12", "population_13", "population_14", "population_15", "population_16", "population_17", "population_18", "population_19", "population_20", "population_21", "population_22", "population_23", "population_24", "population_25", "population_26", "population_27", "population_28", "population_29", "population_30", "population_31", "population_32", "population_33", "population_34", "population_35", "population_36", "population_37", "population_38", "population_39", "population_40", "population_41", "population_42", "population_43", "population_44", "population_45", "population_46", "population_47", "population_48", "population_49", "population_50", "population_51", "population_52", "population_53", "population_54", "population_55", "population_56", "population_57", "population_58", "population_59", "population_60", "population_61", "population_62", "population_63", "population_64", "population_65", "population_66", "population_67", "population_68", "population_69", "population_70", "population_71", "population_72", "population_73", "population_74", "population_75", "population_76", "population_77", "population_78", "population_79", "population_80", "population_81", "population_82", "population_83", "population_84", "population_85", "population_86", "population_87", "population_88", "population_89", "population_90", "population_91", "population_92", "population_93", "population_94", "population_95", "population_96", "population_97", "population_98", "population_99"]
-#Populations = ["population_7","population_20"]
+Populations = ["Train_001","Train_002","Train_003","Train_004","Train_005","Train_006","Train_007","Train_008","Train_009","Train_000","Train_100","Train_101","Train_102","Train_103","Train_104","Train_105","Train_106","Train_107","Train_108","Train_109","Train_200","Train_201","Train_202","Train_203","Train_204","Train_205","Train_206","Train_207","Train_208","Train_209",\
+"Test_000","Test_001","Test_002","Test_003","Test_004","Test_005","Test_006","Test_007","Test_008","Test_009","Test_100","Test_101","Test_102","Test_103","Test_104","Test_105","Test_106","Test_107","Test_108","Test_109","Test_210","Test_211","Test_212","Test_213","Test_214","Test_200","Test_201","Test_202","Test_203","Test_204","Test_205","Test_206","Test_207","Test_208","Test_209"]
+
 rule terminated:
 	input:
-#				alignments = expand("{pop}/single_alignment", pop=Populations),
+				alignments = expand("{pop}/single_alignment", pop=Populations),
 #				kmer_counts = expand("{pop}/single_kmer_count", pop=Populations),
-				single_end_reads = expand("{pop}/reads.fastq", pop=Populations)
+#				single_end_reads = expand("{pop}/reads.fastq", pop=Populations)
 #				pop_configurations = expand("{pop}/config.ini", pop=Populations)
 	output:
 		"TERMINATED"
@@ -38,14 +39,16 @@ rule camisim:
 		"{sample}/reads_2.fastq",
 		"{sample}/reads.fastq"
 	conda: "env.yaml"
-	threads: 20
+	threads: 6
+	resources:
+		mem_mb = 100000
 	shell:
 		"""
 		rm -rf {wildcards.sample}/camisim_out
 		mkdir -p tmp
 		python CAMISIM/metagenomesimulation.py {input.C}
 		gunzip {wildcards.sample}/camisim_out/{anno}*/reads/anonymous_reads.fq.gz
-		python my_scripts/split_pair_end.py {wildcards.sample}/camisim_out/2022*/reads/anonymous_reads.fq {wildcards.sample}/
+		python my_scripts/split_pair_end.py {wildcards.sample}/camisim_out/{anno}*/reads/anonymous_reads.fq {wildcards.sample}/
 		mv {wildcards.sample}/camisim_out/{anno}*/reads/anonymous_reads.fq {wildcards.sample}/reads.fastq
 		rm -r {wildcards.sample}/camisim_out/{anno}*/reads
 		"""

@@ -2,3 +2,4 @@ rgi*
 .snakemake
 population*
 Train_*
+Test_*

@@ -22,13 +22,13 @@ rule terminated:
 
 rule population_set_up:
 	input:
-		i_1 = "{sample}/input.json",
-		i_2 = "{sample}/input.tsv"
+		i_1 = "{sample}/input.tsv",
+		i_2 = "{sample}/input.json"
 	output:
 		"{sample}/config.ini"
 	shell:
 		"""
-		python my_scripts/generate_files.py {wildcards.sample}
+		python my_scripts/generatecamisim_input.py {input.i_1} {input.i_2}
 		"""
 
 rule camisim:

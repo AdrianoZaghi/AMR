@@ -8,7 +8,7 @@ from sklearn.model_selection import GridSearchCV
 
 average_read_length = 270
 
-def read_bwt_2(popolazioni):
+def read_bwt_2_aro(popolazioni):
 	resistomes = {}
 	for P in popolazioni:
 		with open(P+"/bwt_out/bwt.allele_mapping_data.json", mode = "r") as f:
@@ -23,6 +23,37 @@ def read_bwt_2(popolazioni):
 			resistomes[P] = R
 	Return = pd.DataFrame.from_dict(resistomes, orient="index").fillna(0)
 	return Return
+
+def read_bwt_2_various(popolazioni):
+	Path = {}
+	Anti = {}
+	Drug = {}
+	for P in popolazioni:
+		with open(P+"/bwt_out/bwt.allele_mapping_data.json", mode = "r") as f:
+			dati_ = json.load(f)
+			dati = [di for di in dati_ if isinstance(di, dict)]
+			Pathogens = {}
+			Antibiotics = {}
+			Drugs_class = {}
+			for aro in dati:
+				if str(aro["observed_in_pathogens"]) in Pathogens.keys():
+					Pathogens[str(aro["observed_in_pathogens"])] += int(aro["reads"]["all"]) * average_read_length / int(aro["reference"]["sequence_length"])
+				else:
+					Pathogens[str(aro["observed_in_pathogens"])] = int(aro["reads"]["all"]) * average_read_length / int(aro["reference"]["sequence_length"])
+				for anti in aro["resistomes"]["Antibiotics"]:
+					if str(anti) in Antibiotics.keys():
+						Antibiotics[anti] += int(aro["reads"]["all"]) * average_read_length / int(aro["reference"]["sequence_length"])
+					else:
+						Antibiotics[anti] = int(aro["reads"]["all"]) * average_read_length / int(aro["reference"]["sequence_length"])
+				for d_class in aro["resistomes"]["Drug Class"]:
+					if str(d_class) in Drugs_class.keys():
+						Antibiotics[d_class] += int(aro["reads"]["all"]) * average_read_length / int(aro["reference"]["sequence_length"])
+					else:
+						Antibiotics[d_class] = int(aro["reads"]["all"]) * average_read_length / int(aro["reference"]["sequence_length"])
+		Path[P], Anti[P], Drug[P] = Pathogens, Antibiotics, Drugs_class
+	return({"Pathognes":pd.DataFrame.from_dict(Path, orient="index").fillna(0),\
+		"Antibiotics": pd.DataFrame.from_dict(Anti, orient="index").fillna(0),\
+		"Drugs_class": pd.DataFrame.from_dict(Drug, orient="index").fillna(0)})
 
 def read_metadata(popolazioni):
 	metadata = {}
@@ -64,8 +95,8 @@ params = {"alpha":[0.01]+list(range(1, 100, 10)), "l1_ratio":[0, .1, .5, .7, .9,
 
 Train = Train_0
 Test = Test_0
-#Train_data = read_bwt_2(Train)
-#Test_data = read_bwt_2(Test)
+Train_data = read_bwt_2(Train)
+Test_data = read_bwt_2(Test)
 Train_target= read_metadata(Train)["Abundances"]
 Test_target= read_metadata(Test)["Abundances"]
 print(Train_target, Test_target)

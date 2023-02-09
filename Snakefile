@@ -28,7 +28,7 @@ rule population_set_up:
 		"{sample}/config.ini"
 	shell:
 		"""
-		python my_scripts/generatecamisim_input.py {input.i_1} {input.i_2}
+		python my_scripts/generate_camisim_input.py {input.i_1} {input.i_2}
 		"""
 
 rule camisim:

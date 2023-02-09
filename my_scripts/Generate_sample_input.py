@@ -8,19 +8,19 @@ Created on Thu Nov 10 17:34:05 2022
 import json
 import os
 
-def generate_input_tsv(Filename, abundance, metadatas):
-	with open(Filename, 'w') as tab:
+def generate_input_tsv(Filename, abundance, metadatas, are_percentages=True):
+	with open(Filename, mode='w') as tab:
 		print("Genome_ID\tSpecies_Name\tAbundance\tPATRIC_ID\tAntibiotic\tPhenotype\tGenome_length\tNovelty_category\tGenome_file", file = tab)
 		for i in range(len(abundance)):
 			Ab=abundance[i]
-			if Ab < 1 and Ab > 0:			
+			if (not are_percentages) and Ab>0:			
 				with open(metadatas[i], 'r') as O:
 					Ot = json.load(O)
 					print(Ot["Genome_ID"]+"\t"+Ot["Species_Name"]+"\t"+str(Ab)+"\t"+Ot["PATRIC_ID"]+"\t"+Ot["Antibiotic"]+"\t"+Ot["Phenotype"]+"\t"+Ot["Genome_length"]+"\t"+"known_strain"+"\t"+Ot["Genome_file"], file=tab)
-			elif Ab > 1:
+			elif Ab>0:
 				with open(metadatas[i], 'r') as O:
 					Ot = json.load(O)
-					print(Ot["Genome_ID"]+"\t"+Ot["Species_Name"]+"\t"+str(round(Ab*0.01, 5))+"\t"+Ot["PATRIC_ID"]+"\t"+Ot["Antibiotic"]+"\t"+Ot["Phenotype"]+"\t"+Ot["Genome_length"]+"\t"+"known_strain"+"\t"+Ot["Genome_file"], file=tab)
+					print(Ot["Genome_ID"]+"\t"+Ot["Species_Name"]+"\t"+str(round(Ab*0.01, 14))+"\t"+Ot["PATRIC_ID"]+"\t"+Ot["Antibiotic"]+"\t"+Ot["Phenotype"]+"\t"+Ot["Genome_length"]+"\t"+"known_strain"+"\t"+Ot["Genome_file"], file=tab)
 
 def generate_input_json(Filename, abundance, processors=8, size=0.01, fragment_size=270, fragment_dev=27):
 	dic = {"simulation_directory":os.getcwd()+"/"+Filename.split("/input.json")[0],
@@ -57,10 +57,11 @@ Train_2=[[3,47,47,0,3],[26,24,24,0,26],[41,9,9,0,41],[32,18,18,0,32],[31,19,19,0
 Test_2=[[47.5,5,0,0,47.5],[49.5,1,0,0,49.5],[49.75,0.5,0,0,49.75],[47.5,0,5,0,47.5],[49.5,0,1,0,49.5],[49.75,0,0.5,0,49.75],\
 		[47.5,0,0,5,47.5],[49.5,0,0,1,49.5],[49.75,0,0,0.5,49.75],[47.5,2.5,2.5,0,47.5],[49.5,0.5,0.5,0,49.5],[47.5,2.5,0,2.5,47.5],\
 		[49.5,0.5,0,0.5,49.5],[47.5,0,2.5,2.5,47.5],[49.5,0,0.5,0.5,49.5]]
-directory_tag = "Train_2"
-abundances=Train_2
+directory_tag = "Train_0"
+abundances=Train_0
 for i in range(len(abundances)):
 	path=directory_tag+str(i).zfill(2)
-	os.mkdir(path)
-	generate_input_tsv(path+"/input.tsv", abundances[i], Metadata_paths)
+	if not os.path.exists(path):
+		os.mkdir(path)
+	generate_input_tsv(path+"/input.tsv", abundances[i], Metadata_paths, are_percentages=True)
 	generate_input_json(path+"/input.json", abundances[i])

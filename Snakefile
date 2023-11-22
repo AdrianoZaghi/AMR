@@ -5,20 +5,23 @@ anno = "2023"
 max_count = 120000000
 wild_card_version = "4.0.0"
 card_version = "3.2.6"
+import os
 
-Populations = ["Train_001","Train_002","Train_003","Train_004","Train_005","Train_006","Train_007","Train_008","Train_009","Train_000","Train_100","Train_101","Train_102","Train_103","Train_104","Train_105","Train_106","Train_107","Train_108","Train_109","Train_200","Train_201","Train_202","Train_203","Train_204","Train_205","Train_206","Train_207","Train_208","Train_209",\
-"Test_000","Test_001","Test_002","Test_003","Test_004","Test_005","Test_006","Test_007","Test_008","Test_009","Test_100","Test_101","Test_102","Test_103","Test_104","Test_105","Test_106","Test_107","Test_108","Test_109","Test_210","Test_211","Test_212","Test_213","Test_214","Test_200","Test_201","Test_202","Test_203","Test_204","Test_205","Test_206","Test_207","Test_208","Test_209"]
+Populations = os.listdir("samples/",)
 
 rule terminated:
 	input:
-				alignments = expand("{pop}/single_alignment", pop=Populations),
-#				kmer_counts = expand("{pop}/single_kmer_count", pop=Populations),
-#				single_end_reads = expand("{pop}/reads.fastq", pop=Populations)
-#				pop_configurations = expand("{pop}/config.ini", pop=Populations)
+				alignments_test = expand("samples/{pop}/paired_alignment", pop=Populations),
+# 				kmer_counts = expand("{pop}/single_kmer_count", pop=Populations),
+#				single_end_reads = expand("samples/{pop}/reads.fastq", pop=Populations)
+#				pop_configurations = expand("samples/{pop}/config.ini", pop=Populations)
 	output:
 		"TERMINATED"
 	shell:
-		"touch TERMINATED"
+		"""
+		date
+		touch TERMINATED
+		"""
 
 rule population_set_up:
 	input:
@@ -108,7 +111,7 @@ rule rgi_bowtie2_paired:
 		"{sample}/paired_alignment",
 		"{sample}/bwt_out/bwt.allele_mapping_data.json"
 	conda: "env.yaml"
-	threads: 20
+	threads: 5
 	shell:
 		"""
 		mkdir -p {wildcards.sample}/bwt_out

@@ -1,0 +1,510 @@
+Nome,Aureus_S,Aureus_R,Coli,Pseudomonas,Arcobacter,Size,N strains,Real/Simul,Original sample,Seed
+A00,0.6,0.4,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A01,0.64,0.36,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A02,0.85,0.15,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A03,0.11,0.89,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A04,0.4,0.96,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A05,0.48,0.52,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A06,0.93,0.7,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A07,0.34,0.66,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A08,0.39,0.61,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A09,0.24,0.76,0,0,0,0.01,1,Simul,"Campione_simulato",1
+B00,0.65,0.35,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B01,0.12,0.88,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B02,0.62,0.38,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B03,0.86,0.14,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B04,0.9,0.1,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B05,0.92,0.8,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B06,0.3,0.7,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B07,0.76,0.24,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B08,0.59,0.41,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B09,0.36,0.64,0,0,0,0.01,5,Simul,"Campione_simulato",1
+C00,0.047,0.175,0.282,0.005,0.491,0.01,1,Simul,"Campione_simulato",1
+C01,0.104,0.511,0.159,0.022,0.204,0.01,1,Simul,"Campione_simulato",1
+C02,0.039,0.136,0.172,0.308,0.345,0.01,1,Simul,"Campione_simulato",1
+C03,0.029,0.218,0.515,0.174,0.064,0.01,1,Simul,"Campione_simulato",1
+C04,0.54,0.041,0.195,0.199,0.025,0.01,1,Simul,"Campione_simulato",1
+C05,0.089,0.355,0.156,0.3,0.1,0.01,1,Simul,"Campione_simulato",1
+C06,0.005,0.577,0.038,0.02,0.36,0.01,1,Simul,"Campione_simulato",1
+C07,0.152,0.029,0.321,0.235,0.263,0.01,1,Simul,"Campione_simulato",1
+C08,0.426,0.096,0.203,0.204,0.071,0.01,1,Simul,"Campione_simulato",1
+C09,0.194,0.349,0.083,0.279,0.095,0.01,1,Simul,"Campione_simulato",1
+D00,0.318,0.155,0.11,0.262,0.155,0.01,1,Simul,"Campione_simulato",1
+D01,0.171,0.012,0.492,0.037,0.288,0.01,1,Simul,"Campione_simulato",1
+D02,0.339,0.107,0.202,0.345,0.007,0.01,1,Simul,"Campione_simulato",1
+D03,0.014,0.121,0.256,0.006,0.603,0.01,1,Simul,"Campione_simulato",1
+D04,0.344,0.05,0.264,0.12,0.222,0.01,1,Simul,"Campione_simulato",1
+D05,0.23,0.545,0.013,0.019,0.193,0.01,1,Simul,"Campione_simulato",1
+D06,0.329,0.476,0.078,0.027,0.09,0.01,1,Simul,"Campione_simulato",1
+D07,0.097,0.252,0.069,0.386,0.196,0.01,1,Simul,"Campione_simulato",1
+D08,0.372,0.342,0.151,0.026,0.109,0.01,1,Simul,"Campione_simulato",1
+D09,0.179,0.081,0.378,0.173,0.189,0.01,1,Simul,"Campione_simulato",1
+E00,0.55,0.027,0.102,0.126,0.195,0.1,1,Simul,"Campione_simulato",1
+E01,0.478,0.165,0.202,0.065,0.09,0.1,1,Simul,"Campione_simulato",1
+E02,0.053,0.02,0.825,0.1,0.002,0.1,1,Simul,"Campione_simulato",1
+E03,0.497,0.021,0.062,0.041,0.379,0.1,1,Simul,"Campione_simulato",1
+E04,0.041,0.375,0.441,0.035,0.108,0.1,1,Simul,"Campione_simulato",1
+E05,0.2,0.132,0.268,0.381,0.019,0.1,1,Simul,"Campione_simulato",1
+E06,0.44,0.087,0.154,0.188,0.131,0.1,1,Simul,"Campione_simulato",1
+E07,0.292,0.102,0.215,0.151,0.24,0.1,1,Simul,"Campione_simulato",1
+E08,0.001,0.248,0.127,0.401,0.223,0.1,1,Simul,"Campione_simulato",1
+E09,0.167,0.254,0.345,0.04,0.194,0.1,1,Simul,"Campione_simulato",1
+F00,0.867,0.021,0,0,0.112,0.01,1,Simul,"Campione_simulato",1
+F01,0.431,0.373,0,0,0.196,0.01,1,Simul,"Campione_simulato",1
+F02,0.658,0.267,0,0,0.075,0.01,1,Simul,"Campione_simulato",1
+F03,0.257,0.706,0,0,0.037,0.01,1,Simul,"Campione_simulato",1
+F04,0.263,0.475,0,0,0.262,0.01,1,Simul,"Campione_simulato",1
+F05,0.073,0.411,0,0,0.516,0.01,1,Simul,"Campione_simulato",1
+F06,0.779,0.22,0,0,0.001,0.01,1,Simul,"Campione_simulato",1
+F07,0.419,0.259,0,0,0.322,0.01,1,Simul,"Campione_simulato",1
+F08,0.434,0.034,0,0,0.532,0.01,1,Simul,"Campione_simulato",1
+F09,0.313,0.053,0,0,0.634,0.01,1,Simul,"Campione_simulato",1
+G00,0.121,0.61,0.269,0,0,0.01,1,Simul,"Campione_simulato",1
+G01,0.084,0.561,0.355,0,0,0.01,1,Simul,"Campione_simulato",1
+G02,0.082,0.394,0.524,0,0,0.01,1,Simul,"Campione_simulato",1
+G03,0.146,0.254,0.6,0,0,0.01,1,Simul,"Campione_simulato",1
+G04,0.473,0.325,0.202,0,0,0.01,1,Simul,"Campione_simulato",1
+G05,0.364,0.615,0.021,0,0,0.01,1,Simul,"Campione_simulato",1
+G06,0.383,0.587,0.03,0,0,0.01,1,Simul,"Campione_simulato",1
+G07,0.167,0.43,0.403,0,0,0.01,1,Simul,"Campione_simulato",1
+G08,0.482,0.14,0.378,0,0,0.01,1,Simul,"Campione_simulato",1
+G09,0.754,0.17,0.076,0,0,0.01,1,Simul,"Campione_simulato",1
+A10,0.42,0.68,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A11,0.2,0.8,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A12,0.83,0.17,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A13,0.22,0.78,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A14,0.58,0.42,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A15,0.04,0.96,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A16,0.76,0.24,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A17,0.13,0.87,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A18,0.6,0.4,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A19,0.77,0.23,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A20,0.84,0.16,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A21,0.79,0.21,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A22,0.48,0.52,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A23,0.37,0.63,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A24,0.6,0.4,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A25,0.12,0.88,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A26,0.81,0.19,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A28,0.58,0.42,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A29,0.5,0.5,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A30,1,0,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A31,1,0,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A32,0.0,0.001,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A33,0.0,0.001,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A34,0.27,0.73,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A35,0.86,0.14,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A36,0.92,0.08,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A37,0.38,0.62,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A38,0.37,0.63,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A39,0.14,0.86,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A40,0.8,0.2,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A41,0.28,0.72,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A42,0.32,0.68,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A43,0.75,0.25,0,0,0,0.01,1,Simul,"Campione_simulato",1
+A44,0.16,0.84,0,0,0,0.01,1,Simul,"Campione_simulato",1
+B34,0.52,0.48,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B35,0.03,0.97,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B36,0.7,0.3,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B37,0.21,0.79,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B38,0.27,0.73,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B39,0.4,0.6,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B40,0.59,0.41,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B41,0.85,0.15,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B42,0.11,0.89,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B43,0.26,0.74,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B10,0.3,0.7,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B11,0.6,0.4,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B12,0.82,0.18,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B13,0.05,0.95,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B14,0,1,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B15,0.02,0.98,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B16,0.69,0.31,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B17,0.09,0.91,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B18,0.8,0.2,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B19,0.31,0.69,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B20,0.53,0.47,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B21,0.1,0.9,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B22,0.19,0.81,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B23,0.94,0.06,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B24,0.99,0.01,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B25,0.47,0.53,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B26,0.38,0.62,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B27,0.47,0.53,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B28,0.55,0.45,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B29,0.07,0.93,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B30,1,0,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B31,1,0,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B32,0.09,0.0001,0,0,0,0.01,5,Simul,"Campione_simulato",1
+B33,0.9999,0.0001,0,0,0,0.01,5,Simul,"Campione_simulato",1
+C30,0.181,0.174,0.008,0.111,0.526,0.01,1,Simul,"Campione_simulato",1
+C31,0.03,0.027,0.307,0.38,0.256,0.01,1,Simul,"Campione_simulato",1
+C32,0.576,0.214,0.026,0.177,0.007,0.01,1,Simul,"Campione_simulato",1
+C33,0.302,0.014,0.306,0.244,0.134,0.01,1,Simul,"Campione_simulato",1
+C34,0.122,0.223,0.044,0.169,0.442,0.01,1,Simul,"Campione_simulato",1
+C35,0.051,0.326,0.3,0.141,0.182,0.01,1,Simul,"Campione_simulato",1
+C36,0.183,0.351,0.061,0.194,0.211,0.01,1,Simul,"Campione_simulato",1
+C37,0.028,0.294,0.218,0.042,0.418,0.01,1,Simul,"Campione_simulato",1
+C38,0.128,0.019,0.702,0.085,0.066,0.01,1,Simul,"Campione_simulato",1
+C39,0.532,0.057,0.11,0.117,0.184,0.01,1,Simul,"Campione_simulato",1
+C10,0.088,0.138,0.067,0.235,0.472,0.01,1,Simul,"Campione_simulato",1
+C11,0.295,0.022,0.189,0.012,0.482,0.01,1,Simul,"Campione_simulato",1
+C12,0.152,0.393,0.014,0.174,0.267,0.01,1,Simul,"Campione_simulato",1
+C13,0.018,0.572,0.079,0.065,0.266,0.01,1,Simul,"Campione_simulato",1
+C14,0.016,0.142,0.242,0.142,0.458,0.01,1,Simul,"Campione_simulato",1
+C15,0.029,0.218,0.435,0.025,0.293,0.01,1,Simul,"Campione_simulato",1
+C16,0.06,0.554,0.254,0.115,0.017,0.01,1,Simul,"Campione_simulato",1
+C17,0.049,0.062,0.336,0.458,0.095,0.01,1,Simul,"Campione_simulato",1
+C18,0.017,0.507,0.06,0.275,0.141,0.01,1,Simul,"Campione_simulato",1
+C19,0.098,0.099,0.086,0.037,0.68,0.01,1,Simul,"Campione_simulato",1
+C20,0.118,0.48,0.151,0.064,0.187,0.01,1,Simul,"Campione_simulato",1
+C21,0.104,0.066,0.277,0.312,0.241,0.01,1,Simul,"Campione_simulato",1
+C22,0.349,0.269,0.266,0.001,0.115,0.01,1,Simul,"Campione_simulato",1
+C23,0.079,0.347,0.155,0.346,0.073,0.01,1,Simul,"Campione_simulato",1
+C24,0.068,0.206,0.042,0.389,0.295,0.01,1,Simul,"Campione_simulato",1
+C25,0.031,0.07,0.077,0.484,0.338,0.01,1,Simul,"Campione_simulato",1
+C26,0.054,0.045,0.183,0.173,0.545,0.01,1,Simul,"Campione_simulato",1
+C27,0.011,0.259,0.274,0.008,0.448,0.01,1,Simul,"Campione_simulato",1
+C28,0.184,0.021,0.503,0.168,0.124,0.01,1,Simul,"Campione_simulato",1
+C29,0.027,0.095,0.141,0.408,0.329,0.01,1,Simul,"Campione_simulato",1
+D30,0.01,0.217,0.008,0.649,0.116,0.01,1,Simul,"Campione_simulato",1
+D31,0.085,0.076,0.324,0.143,0.372,0.01,1,Simul,"Campione_simulato",1
+D32,0.007,0.025,0.209,0.572,0.187,0.01,1,Simul,"Campione_simulato",1
+D33,0.156,0.304,0.386,0.112,0.042,0.01,1,Simul,"Campione_simulato",1
+D34,0.046,0.275,0.108,0.021,0.55,0.01,1,Simul,"Campione_simulato",1
+D35,0.15,0.179,0.236,0.167,0.268,0.01,1,Simul,"Campione_simulato",1
+D36,0.045,0.087,0.315,0.012,0.541,0.01,1,Simul,"Campione_simulato",1
+D37,0.258,0.196,0.207,0.048,0.291,0.01,1,Simul,"Campione_simulato",1
+D38,0.414,0.071,0.031,0.396,0.088,0.01,1,Simul,"Campione_simulato",1
+D39,0.351,0.097,0.22,0.251,0.081,0.01,1,Simul,"Campione_simulato",1
+D10,0.317,0.479,0.147,0.013,0.044,0.01,1,Simul,"Campione_simulato",1
+D11,0.057,0.371,0.135,0.274,0.163,0.01,1,Simul,"Campione_simulato",1
+D12,0.189,0.351,0.205,0.224,0.031,0.01,1,Simul,"Campione_simulato",1
+D13,0.287,0.015,0.224,0.081,0.393,0.01,1,Simul,"Campione_simulato",1
+D14,0.184,0.152,0.266,0.201,0.197,0.01,1,Simul,"Campione_simulato",1
+D15,0.119,0.476,0.178,0.178,0.049,0.01,1,Simul,"Campione_simulato",1
+D16,0.205,0.04,0.639,0.073,0.043,0.01,1,Simul,"Campione_simulato",1
+D17,0.367,0.022,0.321,0.233,0.057,0.01,1,Simul,"Campione_simulato",1
+D18,0.242,0.126,0.33,0.225,0.077,0.01,1,Simul,"Campione_simulato",1
+D19,0.361,0.221,0.083,0.149,0.186,0.01,1,Simul,"Campione_simulato",1
+D20,0.283,0.01,0.622,0.001,0.084,0.01,1,Simul,"Campione_simulato",1
+D21,0.378,0.002,0.186,0.149,0.285,0.01,1,Simul,"Campione_simulato",1
+D22,0.349,0.036,0.091,0.239,0.285,0.01,1,Simul,"Campione_simulato",1
+D23,0.124,0.176,0.009,0.446,0.245,0.01,1,Simul,"Campione_simulato",1
+D24,0.322,0.044,0.216,0.225,0.193,0.01,1,Simul,"Campione_simulato",1
+D25,0.009,0.295,0.04,0.576,0.08,0.01,1,Simul,"Campione_simulato",1
+D26,0.545,0.118,0.089,0.091,0.157,0.01,1,Simul,"Campione_simulato",1
+D27,0.003,0.355,0.097,0.228,0.317,0.01,1,Simul,"Campione_simulato",1
+D28,0.314,0.337,0.169,0.042,0.138,0.01,1,Simul,"Campione_simulato",1
+D29,0.021,0.54,0.154,0.144,0.141,0.01,1,Simul,"Campione_simulato",1
+E30,0.091,0.295,0.104,0.299,0.211,0.1,1,Simul,"Campione_simulato",1
+E31,0.08,0.085,0.091,0.195,0.549,0.1,1,Simul,"Campione_simulato",1
+E32,0.135,0.098,0.222,0.541,0.004,0.1,1,Simul,"Campione_simulato",1
+E33,0.341,0.113,0.288,0.254,0.004,0.1,1,Simul,"Campione_simulato",1
+E34,0.318,0.26,0.042,0.171,0.209,0.1,1,Simul,"Campione_simulato",1
+E35,0.132,0.409,0.092,0.167,0.2,0.1,1,Simul,"Campione_simulato",1
+E36,0.054,0.452,0.004,0.049,0.441,0.1,1,Simul,"Campione_simulato",1
+E37,0.426,0.005,0.211,0.348,0.01,0.1,1,Simul,"Campione_simulato",1
+E38,0.102,0.234,0.026,0.215,0.423,0.1,1,Simul,"Campione_simulato",1
+E39,0.157,0.104,0.023,0.681,0.035,0.1,1,Simul,"Campione_simulato",1
+E10,0.143,0.548,0.025,0.052,0.232,0.1,1,Simul,"Campione_simulato",1
+E11,0.083,0.031,0.029,0.539,0.318,0.1,1,Simul,"Campione_simulato",1
+E12,0.303,0.214,0.152,0.178,0.153,0.1,1,Simul,"Campione_simulato",1
+E13,0.352,0.363,0.155,0.065,0.065,0.1,1,Simul,"Campione_simulato",1
+E14,0.17,0.198,0.107,0.384,0.141,0.1,1,Simul,"Campione_simulato",1
+E15,0.096,0.069,0.165,0.237,0.433,0.1,1,Simul,"Campione_simulato",1
+E16,0.257,0.117,0.215,0.247,0.164,0.1,1,Simul,"Campione_simulato",1
+E17,0.328,0.241,0.027,0.115,0.289,0.1,1,Simul,"Campione_simulato",1
+E18,0.053,0.023,0.165,0.071,0.688,0.1,1,Simul,"Campione_simulato",1
+E19,0.189,0.115,0.614,0.063,0.019,0.1,1,Simul,"Campione_simulato",1
+E20,0.113,0.027,0.392,0.24,0.228,0.1,1,Simul,"Campione_simulato",1
+E21,0.047,0.381,0.127,0.399,0.046,0.1,1,Simul,"Campione_simulato",1
+E22,0.081,0.051,0.113,0.687,0.068,0.1,1,Simul,"Campione_simulato",1
+E23,0.029,0.335,0.042,0.311,0.283,0.1,1,Simul,"Campione_simulato",1
+E24,0.308,0.308,0.296,0.041,0.047,0.1,1,Simul,"Campione_simulato",1
+E25,0.075,0.087,0.172,0.198,0.468,0.1,1,Simul,"Campione_simulato",1
+E26,0.169,0.338,0.309,0.15,0.034,0.1,1,Simul,"Campione_simulato",1
+E27,0.154,0.616,0.145,0.028,0.057,0.1,1,Simul,"Campione_simulato",1
+E28,0.165,0.06,0.263,0.218,0.294,0.1,1,Simul,"Campione_simulato",1
+E29,0.383,0.019,0.059,0.049,0.49,0.1,1,Simul,"Campione_simulato",1
+F30,0.704,0.061,0,0,0.235,0.01,1,Simul,"Campione_simulato",1
+F31,0.471,0.481,0,0,0.048,0.01,1,Simul,"Campione_simulato",1
+F32,0.139,0.602,0,0,0.259,0.01,1,Simul,"Campione_simulato",1
+F33,0.269,0.621,0,0,0.11,0.01,1,Simul,"Campione_simulato",1
+F34,0.193,0.515,0,0,0.292,0.01,1,Simul,"Campione_simulato",1
+F35,0.017,0.903,0,0,0.08,0.01,1,Simul,"Campione_simulato",1
+F36,0.076,0.717,0,0,0.207,0.01,1,Simul,"Campione_simulato",1
+F37,0.01,0.89,0,0,0.1,0.01,1,Simul,"Campione_simulato",1
+F38,0.13,0.143,0,0,0.727,0.01,1,Simul,"Campione_simulato",1
+F39,0.814,0.026,0,0,0.16,0.01,1,Simul,"Campione_simulato",1
+F10,0.353,0.627,0,0,0.02,0.01,1,Simul,"Campione_simulato",1
+F11,0.893,0.059,0,0,0.048,0.01,1,Simul,"Campione_simulato",1
+F12,0.076,0.76,0,0,0.164,0.01,1,Simul,"Campione_simulato",1
+F13,0.802,0.184,0,0,0.014,0.01,1,Simul,"Campione_simulato",1
+F14,0.485,0.451,0,0,0.064,0.01,1,Simul,"Campione_simulato",1
+F15,0.48,0.294,0,0,0.226,0.01,1,Simul,"Campione_simulato",1
+F16,0.915,0.002,0,0,0.083,0.01,1,Simul,"Campione_simulato",1
+F17,0.35,0.488,0,0,0.162,0.01,1,Simul,"Campione_simulato",1
+F18,0.062,0.241,0,0,0.697,0.01,1,Simul,"Campione_simulato",1
+F19,0.942,0.047,0,0,0.011,0.01,1,Simul,"Campione_simulato",1
+F20,0.117,0.146,0,0,0.737,0.01,1,Simul,"Campione_simulato",1
+F21,0.231,0.654,0,0,0.115,0.01,1,Simul,"Campione_simulato",1
+F22,0.002,0.795,0,0,0.203,0.01,1,Simul,"Campione_simulato",1
+F23,0.421,0.368,0,0,0.211,0.01,1,Simul,"Campione_simulato",1
+F24,0.112,0.022,0,0,0.866,0.01,1,Simul,"Campione_simulato",1
+F25,0.57,0.399,0,0,0.031,0.01,1,Simul,"Campione_simulato",1
+F26,0.456,0.505,0,0,0.039,0.01,1,Simul,"Campione_simulato",1
+F27,0.564,0.077,0,0,0.359,0.01,1,Simul,"Campione_simulato",1
+F28,0.151,0.684,0,0,0.165,0.01,1,Simul,"Campione_simulato",1
+F29,0.066,0.437,0,0,0.497,0.01,1,Simul,"Campione_simulato",1
+G30,0.049,0.855,0.096,0,0,0.01,1,Simul,"Campione_simulato",1
+G31,0.867,0.053,0.08,0,0,0.01,1,Simul,"Campione_simulato",1
+G32,0.412,0.377,0.211,0,0,0.01,1,Simul,"Campione_simulato",1
+G33,0.047,0.142,0.811,0,0,0.01,1,Simul,"Campione_simulato",1
+G34,0.103,0.06,0.837,0,0,0.01,1,Simul,"Campione_simulato",1
+G35,0.744,0.075,0.181,0,0,0.01,1,Simul,"Campione_simulato",1
+G36,0.196,0.07,0.734,0,0,0.01,1,Simul,"Campione_simulato",1
+G37,0.44,0.523,0.037,0,0,0.01,1,Simul,"Campione_simulato",1
+G38,0.859,0.056,0.085,0,0,0.01,1,Simul,"Campione_simulato",1
+G39,0.259,0.343,0.398,0,0,0.01,1,Simul,"Campione_simulato",1
+G10,0.029,0.695,0.276,0,0,0.01,1,Simul,"Campione_simulato",1
+G11,0.483,0.292,0.225,0,0,0.01,1,Simul,"Campione_simulato",1
+G12,0.543,0.203,0.254,0,0,0.01,1,Simul,"Campione_simulato",1
+G13,0.379,0.202,0.419,0,0,0.01,1,Simul,"Campione_simulato",1
+G14,0.417,0.101,0.482,0,0,0.01,1,Simul,"Campione_simulato",1
+G15,0.001,0.16,0.839,0,0,0.01,1,Simul,"Campione_simulato",1
+G16,0.207,0.259,0.534,0,0,0.01,1,Simul,"Campione_simulato",1
+G17,0.11,0.183,0.707,0,0,0.01,1,Simul,"Campione_simulato",1
+G18,0.115,0.125,0.76,0,0,0.01,1,Simul,"Campione_simulato",1
+G19,0.392,0.285,0.323,0,0,0.01,1,Simul,"Campione_simulato",1
+G20,0.491,0.118,0.391,0,0,0.01,1,Simul,"Campione_simulato",1
+G21,0.17,0.397,0.433,0,0,0.01,1,Simul,"Campione_simulato",1
+G22,0.435,0.539,0.026,0,0,0.01,1,Simul,"Campione_simulato",1
+G23,0.445,0.291,0.264,0,0,0.01,1,Simul,"Campione_simulato",1
+G24,0.132,0.018,0.85,0,0,0.01,1,Simul,"Campione_simulato",1
+G25,0.17,0.02,0.81,0,0,0.01,1,Simul,"Campione_simulato",1
+G26,0.319,0.087,0.594,0,0,0.01,1,Simul,"Campione_simulato",1
+G27,0.31,0.114,0.576,0,0,0.01,1,Simul,"Campione_simulato",1
+G28,0.29,0.191,0.519,0,0,0.01,1,Simul,"Campione_simulato",1
+G29,0.202,0.083,0.715,0,0,0.01,1,Simul,"Campione_simulato",1
+DCWGS1_S1_L001,1,0,0,0,0,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS1_S1_L001",111
+DCWGS2_S7_L001,0,1,0,0,0,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS2_S7_L001",111
+DCWGS3_S13_L001,0,0,1,0,0,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS3_13_L001",111
+DCWGS4_S19_L001,0,0,0,1,0,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/CWGS4_S19_L001",111
+DCWGS5_S25_L001,0,0,0,0,1,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS5_S25_L001",111
+DCWGS6_S31_L001,0.414364640883978,0,0,0,0.585635359116022,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS6_S31_L001",111
+DCWGS7_S37_L001,0,0.104743083003953,0.428853754940711,0.466403162055336,0,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS7_S37_L001",111
+DCWGS8_S43_L001,0.985783261802575,0.0142167381974249,0,0,0,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS8_S43_L001",111
+DCWGS9_S2_L001,0.971397733405289,0.0286022665947113,0,0,0,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS9_S2_L001",111
+DCWGS10_S8_L001,0.956840390879479,0.0431596091205212,0,0,0,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS10_S8_L001",111
+DCWGS11_S14_L001,0.94210813762971,0.0578918623702895,0,0,0,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS11_S14_L001",111
+DCWGS12_S20_L001,0.881365416899832,0.118634583100168,0,0,0,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS12_S20_L001",111
+DCWGS13_S26_L001,0.809352517985611,0.190647482014388,0,0,0,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS13_S26_L001",111
+DCWGS14_S32_L001,0.5859375,0.4140625,0,0,0,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS14_S32_L001",111
+DCWGS15_S38_L001,0.320512820512821,0.67948717948718,0,0,0,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS15_S38_L001",111
+DCWGS16_S44_L001,0.409470752089136,0.0118105849582173,0,0,0.578718662952646,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS16_S44_L001",111
+DCWGS17_S3_L001,0.39943342776204,0.0360339943342776,0,0,0.564532577903683,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS17_S3_L001",111
+DCWGS18_S9_L001,0.372781065088757,0.100355029585799,0,0,0.526863905325444,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS18_S9_L001",111
+DCWGS19_S15_L001,0.261324041811847,0.369337979094077,0,0,0.369337979094077,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS19_S15_L001",111
+DCWGS20_S21_L001,0.395033860045147,0,0.0466516177577126,0,0.558314522197141,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS20_S21_L001",111
+DCWGS21_S27_L001,0.359363849525946,0,0.132735243144051,0,0.507900907330003,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS21_S27_L001",111
+DCWGS22_S33_L001,0.284450063211125,0,0.313527180783818,0,0.402022756005057,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS22_S33_L001",111
+DCWGS23_S39_L001,0.121951219512195,0,0.705691056910569,0,0.172357723577236,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS23_S39_L001",111
+DCWGS24_S45_L001,0.393426827962745,0,0,0.050529921849909,0.556043250187346,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS24_S45_L001",111
+DCWGS25_S4_L001,0.355235311901643,0,0,0.142698780610702,0.502065907487655,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS25_S4_L001",111
+DCWGS26_S10_L001,0.276850061522236,0,0,0.331868518193004,0.39128142028476,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS26_S10_L001",111
+DCWGS27_S16_L001,0.114854517611026,0,0,0.72281776416539,0.162327718223583,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS27_S16_L001",111
+DCWGS28_S22_L001,0.402122770543823,0.00579932158879527,0.0237443921654448,0,0.568333515701937,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS28_S22_L001",111
+DCWGS29_S28_L001,0.401288490936886,0.00578728980126665,0,0.0257698187377157,0.567154400524132,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS29_S28_L001",111
+DCWGS30_S34_L001,0.394228706286205,0,0.0232782664664235,0.0253164556962025,0.557176571551169,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS30_S34_L001",111
+DCWGS31_S40_L001,0.378340667596866,0.0170655790490501,0.0698722764838467,0,0.534721476870237,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS31_S40_L001",111
+DCWGS32_S46_L001,0.376040110945167,0.0169618092596544,0,0.0755280563260081,0.53147002346917,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS32_S46_L001",111
+DCWGS33_S5_L001,0.357287654571255,0,0.065984188120819,0.0717616055138861,0.50496655179404,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS33_S5_L001",111
+DCWGS34_S11_L001,0.322679778733866,0.0434337225978283,0.177832411391108,0,0.456054087277197,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS34_S11_L001",111
+DCWGS35_S17_L001,0.317732499495663,0.0427678031067178,0,0.190437764777083,0.449061932620537,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS35_S17_L001",111
+DCWGS36_S23_L001,0.280598610368787,0,0.154641011936576,0.168181008373419,0.396579369321219,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS36_S23_L001",111
+DCWGS37_S29_L001,0.16629711751663,0.117516629711752,0.481152993348115,0,0.235033259423503,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS37_S29_L001",111
+DCWGS38_S35_L001,0.159574468085106,0.112765957446809,0,0.502127659574468,0.225531914893617,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS38_S35_L001",111
+DCWGS39_S41_L001,0.118296529968454,0,0.342271293375394,0.372239747634069,0.167192429022082,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS39_S41_L001",111
+DCWGS40_S47_L001,0.37031200756382,0.0111356234898624,0.0455930244773611,0.0495850404454249,0.523374304023532,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS40_S47_L001",111
+DCWGS41_S6_L001,0.294061394281343,0.0304102515061681,0.124509897676198,0.135411685951994,0.415606770584298,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS41_S6_L001",111
+DCWGS42_S12_L001,0.260845689181768,0.0388065165659894,0.158887058392824,0.172798828482519,0.368661907376899,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS42_S12_L001",111
+DCWGS43_S18_L001,0.152319950007811,0.066239650054679,0.27120762380878,0.294953913451023,0.215278862677707,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS43_S18_L001",111
+DCWGSSAS_S30_L001,1,0,0,0,0,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGSSAS_S30_L001",111
+DCWGSSAR_S24_L001,0,1,0,0,0,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGSSAR_S24_L001",111
+DCWGSEC_S42_L001,0,0,1,0,0,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGSEC_S42_L001",111
+DCWGSPA_S36_L001,0,0,0,1,0,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGSPA_S36_L001",111
+DCWGSAR_S48_L001,0,0,0,0,1,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGSAR_S48_L001",111
+DCWGS1_S1_L002,1,0,0,0,0,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS1_S1_L001",112
+DCWGS2_S7_L002,0,1,0,0,0,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS2_S7_L001",112
+DCWGS3_S13_L002,0,0,1,0,0,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS3_S13_L001",112
+DCWGS4_S19_L002,0,0,0,1,0,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS4_S19_L001",112
+DCWGS5_S25_L002,0,0,0,0,1,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS5_S25_L001",112
+DCWGS6_S31_L002,0.414364640883978,0,0,0,0.585635359116022,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS6_S31_L001",112
+DCWGS7_S37_L002,0,0.104743083003953,0.428853754940711,0.466403162055336,0,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS7_S37_L001",112
+DCWGS8_S43_L002,0.985783261802575,0.0142167381974249,0,0,0,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS8_S43_L001",112
+DCWGS9_S2_L002,0.971397733405289,0.0286022665947113,0,0,0,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS9_S2_L001",112
+DCWGS10_S8_L002,0.956840390879479,0.0431596091205212,0,0,0,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS10_S8_L001",112
+DCWGS11_S14_L002,0.94210813762971,0.0578918623702895,0,0,0,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS11_S14_L001",112
+DCWGS12_S20_L002,0.881365416899832,0.118634583100168,0,0,0,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS12_S20_L001",112
+DCWGS13_S26_L002,0.809352517985611,0.190647482014388,0,0,0,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS13_S26_L001",112
+DCWGS14_S32_L002,0.5859375,0.4140625,0,0,0,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS14_S32_L001",112
+DCWGS15_S38_L002,0.320512820512821,0.67948717948718,0,0,0,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS15_S38_L001",112
+DCWGS16_S44_L002,0.409470752089136,0.0118105849582173,0,0,0.578718662952646,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS16_S44_L001",112
+DCWGS17_S3_L002,0.39943342776204,0.0360339943342776,0,0,0.564532577903683,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS17_S3_L001",112
+DCWGS18_S9_L002,0.372781065088757,0.100355029585799,0,0,0.526863905325444,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS18_S9_L001",112
+DCWGS19_S15_L002,0.261324041811847,0.369337979094077,0,0,0.369337979094077,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS19_S15_L001",112
+DCWGS20_S21_L002,0.395033860045147,0,0.0466516177577126,0,0.558314522197141,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS20_S21_L001",112
+DCWGS21_S27_L002,0.359363849525946,0,0.132735243144051,0,0.507900907330003,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS21_S27_L001",112
+DCWGS22_S33_L002,0.284450063211125,0,0.313527180783818,0,0.402022756005057,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS22_S33_L001",112
+DCWGS23_S39_L002,0.121951219512195,0,0.705691056910569,0,0.172357723577236,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS23_S39_L001",112
+DCWGS24_S45_L002,0.393426827962745,0,0,0.050529921849909,0.556043250187346,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS24_S45_L001",112
+DCWGS25_S4_L002,0.355235311901643,0,0,0.142698780610702,0.502065907487655,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS25_S4_L001",112
+DCWGS26_S10_L002,0.276850061522236,0,0,0.331868518193004,0.39128142028476,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS26_S10_L001",112
+DCWGS27_S16_L002,0.114854517611026,0,0,0.72281776416539,0.162327718223583,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS27_S16_L001",112
+DCWGS28_S22_L002,0.402122770543823,0.00579932158879527,0.0237443921654448,0,0.568333515701937,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS28_S22_L001",112
+DCWGS29_S28_L002,0.401288490936886,0.00578728980126665,0,0.0257698187377157,0.567154400524132,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS29_S28_L001",112
+DCWGS30_S34_L002,0.394228706286205,0,0.0232782664664235,0.0253164556962025,0.557176571551169,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS30_S34_L001",112
+DCWGS31_S40_L002,0.378340667596866,0.0170655790490501,0.0698722764838467,0,0.534721476870237,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS31_S40_L001",112
+DCWGS32_S46_L002,0.376040110945167,0.0169618092596544,0,0.0755280563260081,0.53147002346917,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS32_S46_L001",112
+DCWGS33_S5_L002,0.357287654571255,0,0.065984188120819,0.0717616055138861,0.50496655179404,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS33_S5_L001",112
+DCWGS34_S11_L002,0.322679778733866,0.0434337225978283,0.177832411391108,0,0.456054087277197,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS34_S11_L001",112
+DCWGS35_S17_L002,0.317732499495663,0.0427678031067178,0,0.190437764777083,0.449061932620537,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS35_S17_L001",112
+DCWGS36_S23_L002,0.280598610368787,0,0.154641011936576,0.168181008373419,0.396579369321219,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS36_S23_L001",112
+DCWGS37_S29_L002,0.16629711751663,0.117516629711752,0.481152993348115,0,0.235033259423503,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS37_S29_L001",112
+DCWGS38_S35_L002,0.159574468085106,0.112765957446809,0,0.502127659574468,0.225531914893617,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS38_S35_L001",112
+DCWGS39_S41_L002,0.118296529968454,0,0.342271293375394,0.372239747634069,0.167192429022082,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS39_S41_L001",112
+DCWGS40_S47_L002,0.37031200756382,0.0111356234898624,0.0455930244773611,0.0495850404454249,0.523374304023532,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS40_S47_L001",112
+DCWGS41_S6_L002,0.294061394281343,0.0304102515061681,0.124509897676198,0.135411685951994,0.415606770584298,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS41_S6_L001",112
+DCWGS42_S12_L002,0.260845689181768,0.0388065165659894,0.158887058392824,0.172798828482519,0.368661907376899,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS42_S12_L001",112
+DCWGS43_S18_L002,0.152319950007811,0.066239650054679,0.27120762380878,0.294953913451023,0.215278862677707,0.01,0,Real,"Real_samples_de_Caesar/samples_trim/DCWGS43_S18_L001",112
+Mart_7_11_a,41.0, 54.2, 4.8, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Mart_7_11_b,81.7, 14.0, 4.3, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Mart_7_11_c,1.5, 92.3, 6.2, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Mart_7_11_d,25.6, 33.7, 40.7, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Mart_7_11_e,46.2, 30.7, 23.1, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Mart_7_11_f,15.3, 54.6, 30.1, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Mart_7_11_g,17.8, 77.7, 4.5, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Mart_7_11_h,26.4, 47.0, 26.6, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Mart_7_11_i,30.4, 29.0, 40.6, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Mart_7_11_l,23.4, 18.7, 57.9, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Mart_7_11_m,58.6, 11.7, 0, 0, 29.7,0.01,5,Simul,"Campione_simulato",1
+Mart_7_11_n,19.9, 48.1, 0, 0, 32.0,0.01,5,Simul,"Campione_simulato",1
+Mart_7_11_o,17.2, 54.8, 0, 0, 28.0,0.01,5,Simul,"Campione_simulato",1
+Mart_7_11_p,25.6, 20.3, 0, 0, 54.1,0.01,5,Simul,"Campione_simulato",1
+Mart_7_11_q,45.7, 15.2, 0, 0, 39.1,0.01,5,Simul,"Campione_simulato",1
+Mart_7_11_r,0.1, 1.1, 0, 0, 98.8,0.01,5,Simul,"Campione_simulato",1
+Mart_7_11_s,7.8, 23.5, 0, 0, 68.7,0.01,5,Simul,"Campione_simulato",1
+Mart_7_11_t,30.4, 53.9, 0, 0, 15.7,0.01,5,Simul,"Campione_simulato",1
+Mart_7_11_u,41.6, 3.8, 0, 0, 54.6,0.01,5,Simul,"Campione_simulato",1
+Mart_7_11_v,50.1, 16.0, 0, 0, 33.9,0.01,5,Simul,"Campione_simulato",1
+Mart_7_11_z,2.3, 53.1, 0, 44.6, 0,0.01,5,Simul,"Campione_simulato",1
+Mart_7_11_aa,14.3, 63.4, 0, 22.3, 0,0.01,5,Simul,"Campione_simulato",1
+Mart_7_11_ab,33.0, 48.6, 0, 18.4, 0,0.01,5,Simul,"Campione_simulato",1
+Mart_7_11_ac,27.0, 58.2, 0, 14.8, 0,0.01,5,Simul,"Campione_simulato",1
+Mart_7_11_ad,27.1, 70.8, 0, 2.1, 0,0.01,5,Simul,"Campione_simulato",1
+Mart_7_11_ae,74.9, 11.5, 0, 13.6, 0,0.01,5,Simul,"Campione_simulato",1
+Mart_7_11_af,19.3, 8.5, 0, 72.2, 0,0.01,5,Simul,"Campione_simulato",1
+Mart_7_11_ag,52.0, 4.3, 0, 43.7, 0,0.01,5,Simul,"Campione_simulato",1
+Mart_7_11_ah,20.8, 79.0, 0, 0.2, 0,0.01,5,Simul,"Campione_simulato",1
+Mart_7_11_ai,18.7, 35.8, 0, 45.5, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_a,68.3, 31.7, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_b,86.0, 14.0, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_c,6.0, 94.0, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_d,96.6, 3.4, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_e,18.2, 81.8, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_f,90.1, 9.9, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_g,58.1, 41.9, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_h,91.9, 8.1, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_i,54.7, 45.3, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_l,6.3, 93.7, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_m,98.0, 2.0, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_n,34.6, 65.4, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_o,12.5, 87.5, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_p,36.5, 63.5, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_q,47.9, 52.1, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_r,97.0, 3.0, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_s,57.4, 42.6, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_t,63.1, 36.9, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_u,65.0, 35.0, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_v,74.9, 25.1, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_az,5.4, 94.6, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_aa,5.4, 94.6, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_ab,28.6, 71.4, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_ac,92.8, 7.2, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_ad,67.0, 33.0, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_ae,18.2, 81.8, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_af,14.7, 85.3, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_ag,16.3, 83.7, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_ah,42.8, 57.2, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_ai,77.7, 22.3, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_al,85.0, 15.0, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_am,92.1, 7.9, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_an,5.7, 94.3, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_ao,80.6, 19.4, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_ap,71.8, 28.2, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_aq,81.0, 19.0, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_ar,34.8, 65.2, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_as,57.0, 43.0, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_at,57.5, 42.5, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_8_11_au,36.2, 63.8, 0, 0, 0,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_a,19.2, 75.1, 0, 0, 5.7,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_b,3.9, 82.1, 0, 0, 14.0,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_c,66.7, 28.2, 0, 0, 5.1,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_d,49.1, 14.6, 0, 0, 36.3,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_e,21.7, 35.5, 0, 0, 42.8,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_f,28.2, 17.6, 0, 0, 54.2,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_g,42.7, 15.5, 0, 0, 41.8,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_h,30.0, 65.6, 0, 0, 4.4,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_i,75.4, 0.2, 0, 0, 24.4,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_l,31.0, 64.7, 0, 0, 4.3,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_m,23.4, 7.9, 0, 0, 68.7,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_n,4.1, 82.2, 0, 0, 13.7,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_o,0.4, 40.8, 0, 0, 58.8,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_p,5.3, 19.2, 0, 0, 75.5,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_q,25.4, 56.4, 0, 0, 18.2,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_r,18.5, 49.6, 0, 0, 31.9,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_s,15.6, 12.7, 0, 0, 71.7,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_t,38.1, 15.9, 0, 0, 46.0,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_u,30.6, 28.1, 0, 0, 41.3,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_v,33.5, 62.0, 0, 0, 4.5,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_x,16.0, 50.2, 0, 0, 33.8,0.01,10,Simul,"Campione_simulato",1
+Merc_22_11_y,3.1, 66.5, 0, 0, 30.4,0.01,10,Simul,"Campione_simulato",1
+Merc_22_11_z,10.9, 36.4, 0, 0, 52.7,0.01,10,Simul,"Campione_simulato",1
+Merc_22_11_aa,20.8, 49.5, 0, 0, 29.7,0.01,10,Simul,"Campione_simulato",1
+Merc_22_11_ab,6.5, 16.4, 0, 0, 77.1,0.01,10,Simul,"Campione_simulato",1
+Merc_22_11_ac,45.6, 43.8, 0, 0, 10.6,0.01,10,Simul,"Campione_simulato",1
+Merc_22_11_ad,47.4, 16.0, 0, 0, 36.6,0.01,10,Simul,"Campione_simulato",1
+Merc_22_11_ae,21.1, 21.7, 0, 0, 57.2,0.01,10,Simul,"Campione_simulato",1
+Merc_22_11_af,11.3, 74.0, 0, 0, 14.7,0.01,10,Simul,"Campione_simulato",1
+Merc_22_11_ag,23.8, 3.5, 0, 0, 72.7,0.01,10,Simul,"Campione_simulato",1
+Merc_22_11_ah,16.6, 67.8, 0, 0, 15.6,0.01,10,Simul,"Campione_simulato",1
+Merc_22_11_ai,26.1, 32.4, 0, 0, 41.5,0.01,10,Simul,"Campione_simulato",1
+Merc_22_11_al,23.8, 51.7, 0, 0, 24.5,0.01,10,Simul,"Campione_simulato",1
+Merc_22_11_am,15.1, 29.4, 0, 0, 55.5,0.01,10,Simul,"Campione_simulato",1
+Merc_22_11_an,53.6, 27.6, 0, 0, 18.8,0.01,10,Simul,"Campione_simulato",1
+Merc_22_11_ao,5.6, 43.1, 0, 0, 51.3,0.01,10,Simul,"Campione_simulato",1
+Merc_22_11_ap,36.7, 11.6, 0, 0, 51.7,0.01,10,Simul,"Campione_simulato",1
+Merc_22_11_aq,83.5, 9.8, 0, 0, 6.7,0.01,10,Simul,"Campione_simulato",1
+Merc_22_11_ar,9.8, 74.8, 0, 0, 15.4,0.01,10,Simul,"Campione_simulato",1
+Merc_22_11_as,16.6, 51.5, 0, 0, 31.9,0.01,10,Simul,"Campione_simulato",1
+Merc_22_11_at,55.2, 11.4, 0, 0, 33.4,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_au,64.7, 8.9, 0, 0, 26.4,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_av,14.2, 38.6, 0, 0, 47.2,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_az,79.7, 11.2, 0, 0, 9.1,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_ax,37.5, 4.5, 0, 0, 58.0,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_ay,39.4, 32.0, 0, 0, 28.6,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_ba,20.2, 38.8, 0, 0, 41.0,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_bb,22.7, 76.8, 0, 0, 0.5,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_bc,73.0, 22.8, 0, 0, 4.2,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_bd,45.5, 53.2, 0, 0, 1.3,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_be,40.4, 36.1, 0, 0, 23.5,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_bf,25.8, 45.1, 0, 0, 29.1,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_bg,28.4, 44.9, 0, 0, 26.7,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_bh,40.4, 24.9, 0, 0, 34.7,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_bi,18.9, 31.5, 0, 0, 49.6,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_bl,1.1, 83.5, 0, 0, 15.4,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_bm,46.9, 0.9, 0, 0, 52.2,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_bn,12.0, 31.3, 0, 0, 56.7,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_bo,12.8, 17.0, 0, 0, 70.2,0.01,5,Simul,"Campione_simulato",1
+Merc_22_11_bp,45.2, 29.0, 0, 0, 25.8,0.01,5,Simul,"Campione_simulato",1

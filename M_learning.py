@@ -5,13 +5,18 @@ from sklearn.linear_model import ElasticNet
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.ensemble import AdaBoostRegressor
 from sklearn.model_selection import GridSearchCV
-import matplotlib.pyplot as plt
+from sklearn.metrics import r2_score
+import numpy as np
 
 import M_learning_images as im
 
 average_read_length = 270
+images_dir = "M_learning_images/"
 
 def read_bwt_2_aro(popolazioni):
+	#Legge le abbondanze delle ARO entries rileate dall'alineamento di rgi bwt
+	#Le aro entries sono identificativi dei resistomi presenti in rgi
+	#Questa funzione restituisce un database con le abbondanze stimate di ogni reistoma per ogni campione
 	resistomes = {}
 	for P in popolazioni:
 		with open(P+"/bwt_out/bwt.allele_mapping_data.json", mode = "r") as f:
@@ -28,6 +33,12 @@ def read_bwt_2_aro(popolazioni):
 	return Return
 
 def read_bwt_2_various(popolazioni):
+	#Questa funzione restituisce dei dataframe che contengono features associate ai resistomi
+	#Le "abbondanze" di qeuste feature sono la somma delle abondanze dei resistomi aventi quella feature nel campione
+	#Le features sono:
+	#	Patogeno a cui è associato il resistoma
+	#	Antibiotico per cui viene sviluppata la resistenza
+	#	Farmaco per cui viene sviluppata la resistenza
 	Path = {}
 	Anti = {}
 	Drug = {}
@@ -64,20 +75,31 @@ def read_bwt_2_various(popolazioni):
 		Path[P], Anti[P], Drug[P] = Pathogens, Antibiotics, Drugs_class
 	print(No_drug_class_found_for_aros, "ARO non avevano drug class associate")
 	print(No_antibiotics_found_for_aros, "ARO non avevano antibiotici associati")
-	return({"Pathognes":pd.DataFrame.from_dict(Path, orient="index").fillna(0),\
+	return({"Pathogens":pd.DataFrame.from_dict(Path, orient="index").fillna(0),\
 		"Antibiotics": pd.DataFrame.from_dict(Anti, orient="index").fillna(0),\
 		"Drugs_class": pd.DataFrame.from_dict(Drug, orient="index").fillna(0)})
 
 def read_metadata(popolazioni):
+	#Legge i metadati del campione, in particolare abbondanza di strains resistenti
+	#DA MODIFICARE IN CASO
 	metadata = {}
 	for P in popolazioni:
 		M_pop = pd.read_csv(P+"/input.tsv", sep="\t")
 		metadata[P] = M_pop
 	[metadata[m]["Phenotype"].replace(["susceptible", "resistant"], [0,1], inplace=True) for m in metadata]
-	r_abundances = [float(metadata[pop_name][["Abundance", "Phenotype"]].prod(axis=1).sum(axis=0)) for pop_name in metadata]
-	return {"Metadata":metadata, "Abundances":r_abundances}
+	r_abundances = []
+	Aureus_r_abundance = []
+	for pop_name in metadata:
+		M = metadata[pop_name]
+		tot = sum(M["Abundance"])
+		r_abundances.append(M[["Abundance", "Phenotype"]].prod(axis=1).sum(axis=0)/tot)
+		if("Aureus_R" in M.values):
+			Aureus_r_abundance.append(M[M["Genome_ID"]=="Aureus_R"].iloc[0]["Abundance"]/tot)
+		else: Aureus_r_abundance.append(0)
+	return {"Metadata":metadata, "Abundances_r":r_abundances, "Aureus_r": Aureus_r_abundance}
 
 def regression(Train, Test, Train_target, Test_target, classifier, parameter_space):
+	#GESTISCE LA GRIDSEARCH PER ALGORITMI DI REGRESSIONE 
 	missing_in_Train = [c for c in Test.columns if c not in Train.columns]
 	missing_in_Test = [c for c in Train.columns if c not in Test.columns]
 	Test[missing_in_Test] = 0
@@ -87,19 +109,85 @@ def regression(Train, Test, Train_target, Test_target, classifier, parameter_spa
 	grid = GridSearchCV(classifier, parameter_space, n_jobs=-1, refit=True).fit(Train, Train_target)
 	best = grid.best_estimator_
 	Test_predictions = best.predict(Test)
-	print("Target \t Predictions")
-	print(Test_target, Test_predictions)
+	#print("Target \t Predictions")
+	#print(Test_target, Test_predictions)
 	return({"Best estimator":best, "Predictions":Test_predictions})
 
+campioni = pd.read_csv("Database_campioni.csv", index_col=0)
+#WHICH = "Tutti gli aureus"
+#Modelli allenati su tutti i campioni sintetici (0.01Gbp) (1 0 5 strain) che contengono esclusivamente Aureus S o R.
+#Testati su tutti i campioni reali (0.01Gbp) che contengono esclusivamnte Aureus S o R
+#7/11/23		R2 = 0.9584
+#9/11/23		R2 = 0.9404
+#WHICH = "Aureus 1 strain train"
+#Modelli allenati su i campioni sintetici (0.01Gbp) da 1 sola strain che contengono esclusivamente Aureus S o R.
+#Testati su tutti i campioni reali (0.01Gbp) che contengono esclusivamnte Aureus S o R
+#7/11/23		R2 = 0.4297
+#WHICH = "Aureus 5 strain train"
+#Modelli allenati su i campioni sintetici (0.01Gbp) da 5 strain che contengono esclusivamente Aureus S o R.
+#Testati su tutti i campioni reali (0.01Gbp) che contengono esclusivamnte Aureus S o R
+#7/11/23		R2 = 0.9622
+#WHICH = "Tutti gli aureus e Pseudomonas"
+#Modelli allenati su i campioni sintetici (0.01Gbp) (1 0 5 strain) che contengono esclusivamente Aureus S o R e Pseudomonas.
+#Testati su tutti i campioni reali (0.01Gbp) che contengono esclusivamnte Aureus S o R e Pseudomonas.
+#7/11/23		R2 = -0.5682
+#8/11/23		R2 = -0.3971
+#9/11/23		R2 = -0.4749
+#WHICH = "Tutti gli aureus e Coli"
+#7/11/23		R2 = -0.301
+#8/11/23		R2 = -0.2979
+#9/11/23		R2 = -0.1771
+WHICH = "Tutti gli Aureus e Arcobacter"
+#7/11/23		R2 = -1.1409
+#8/11/23		R2 = -0.9358
+#9/11/23		R2 = -1.0985
 
+if(WHICH == "Tutti gli aureus"):
+	t = campioni[campioni["Size"] == 0.01]
+	t = t[t["Coli"] == 0]
+	t = t[t["Pseudomonas"] == 0]
+	t = t[t["Arcobacter"] == 0]
+	Test = ["samples/" + x for x in t[t["Real/Simul"] == "Real"].index]
+	Train = ["samples/" + x for x in t[t["Real/Simul"] == "Simul"].index]
+elif(WHICH == "Aureus 1 strain train"):
+	t = campioni[campioni["Size"] == 0.01]
+	t = t[[x in [1,0] for x in t["N strains"]]]
+	t = t[t["Coli"] == 0]
+	t = t[t["Pseudomonas"] == 0]
+	t = t[t["Arcobacter"] == 0]
+	Test = ["samples/" + x for x in t[t["Real/Simul"] == "Real"].index]
+	Train = ["samples/" + x for x in t[t["Real/Simul"] == "Simul"].index]
+elif(WHICH == "Aureus 5 strain train"):
+	t = campioni[campioni["Size"] == 0.01]
+	t = t[[x in [5,0] for x in t["N strains"]]]
+	t = t[t["Coli"] == 0]
+	t = t[t["Pseudomonas"] == 0]
+	t = t[t["Arcobacter"] == 0]
+	Test = ["samples/" + x for x in t[t["Real/Simul"] == "Real"].index]
+	Train = ["samples/" + x for x in t[t["Real/Simul"] == "Simul"].index]	
+elif(WHICH == "Tutti gli aureus e Pseudomonas"):
+	t = campioni[campioni["Size"] == 0.01]
+	t = t[t["Coli"] == 0]
+	t = t[t["Arcobacter"] == 0]
+	Test = ["samples/" + x for x in t[t["Real/Simul"] == "Real"].index]
+	Train = ["samples/" + x for x in t[t["Real/Simul"] == "Simul"].index]
+elif(WHICH == "Tutti gli aureus e Coli"):
+	t = campioni[campioni["Size"] == 0.01]
+	t = t[t["Pseudomonas"] == 0]
+	t = t[t["Arcobacter"] == 0]
+	Test = ["samples/" + x for x in t[t["Real/Simul"] == "Real"].index]
+	Train = ["samples/" + x for x in t[t["Real/Simul"] == "Simul"].index]
+elif(WHICH == "Tutti gli Aureus e Arcobacter"):
+	t = campioni[campioni["Size"] == 0.01]
+	t = t[t["Coli"] == 0]
+	t = t[t["Pseudomonas"] == 0]
+	t_2 = t[t["Arcobacter"] != 0]
+	t_2 = t_2[t_2["N strains"] < 7]
+	Test = ["samples/" + x for x in t_2[t_2["Real/Simul"] == "Real"].index]
+	Train = ["samples/" + x for x in t_2[t_2["Real/Simul"] == "Simul"].index]
 
-Train_0 = ["Train_000", "Train_001", "Train_002", "Train_003", "Train_004", "Train_005", "Train_006", "Train_007", "Train_008", "Train_009"]
-Test_0 = ["Test_000", "Test_001", "Test_002", "Test_003", "Test_004", "Test_005", "Test_006", "Test_007", "Test_008", "Test_009"]
-Train_1 = ["Train_100", "Train_101", "Train_102", "Train_103", "Train_104", "Train_105", "Train_106", "Train_107", "Train_108", "Train_109"]
-Test_1 = ["Test_100", "Test_101", "Test_102", "Test_103", "Test_104", "Test_105", "Test_106", "Test_107", "Test_108", "Test_109"]
-Train_2 = ["Train_200", "Train_201", "Train_202", "Train_203", "Train_204", "Train_205", "Train_206", "Train_207", "Train_208", "Train_209"]
-Test_2 = ["Test_200", "Test_201", "Test_202", "Test_203", "Test_204", "Test_205", "Test_206", "Test_207", "Test_208", "Test_209", "Test_210", "Test_211", "Test_212", "Test_213", "Test_214"]
-Controlli = ["Controllo_Aureus_S" ,"Controllo_Aureus_R" ,"Controllo_Coli" ,"Controllo_Arcobacter" ,"Controllo_Pseudomonas"]
+print("Quanti trains: " + str(len(Train)))
+print("Quanti tests: " + str(len(Test)))
 
 El = ElasticNet(max_iter=100000, tol=0.05)
 params_El = {"alpha":[0.01]+list(range(1, 100, 10)), "l1_ratio":[0, .1, .5, .7, .9, .95, .99, 1]}
@@ -110,15 +198,24 @@ params_Forest = {"criterion":["squared_error", "absolute_error", "friedman_mse",
 Ada =  AdaBoostRegressor(n_estimators=100, random_state=0)
 params_Ada = {"loss":["linear", "square", "exponential"], "learning_rate":[0.5, 1, 1.5, 3, 5]}
 
-Train = Train_0
-Test = Test_0
-Info_controlli = read_bwt_2_various(Controlli)
+#Info_controlli = read_bwt_2_various(Train)
+#im.plot_controls(Info_controlli["Antibiotics"], images_dir+"Control_antibiotics.pdf")
+#im.plot_controls(Info_controlli["Drugs_class"], images_dir+"Control_drugs.pdf")
+#im.plot_controls(Info_controlli["Pathogens"], images_dir+"Control_pathogens.pdf")
+#[Info_controlli[c].to_csv("Controllo_"+c+".tsv", sep="\t") for c in Info_controlli]
+
+def log_ods(vector):
+	return(np.log([vv/(1 - vv) for vv in vector]))
+
+def log_shift(vector):
+	return(np.log([v+1 for v in vector]))
+
 Train_data = read_bwt_2_aro(Train)
 Test_data = read_bwt_2_aro(Test)
-Train_target= read_metadata(Train)["Abundances"]
-Test_target= read_metadata(Test)["Abundances"]
-#[Info_controlli[c].to_csv("Controllo_"+c+".tsv", sep="\t") for c in Info_controlli]
-El_results = regression(Train_data, Test_data, Train_target, Test_target, El, params_El)
-im.plot_results(Test_target, El_results["Predictions"], "M_learning_images/prova")
-Forest_results = regression(Train_data, Test_data, Train_target, Test_target, Forest, params_Forest)
-Ada_results = regression(Train_data, Test_data, Train_target, Test_target, Ada, params_Ada)
+Train_target= log_shift(read_metadata(Train)["Aureus_r"])
+Test_target= log_shift(read_metadata(Test)["Aureus_r"])
+#Results = regression(Train_data, Test_data, Train_target, Test_target, El, params_El)
+Results = regression(Train_data, Test_data, Train_target, Test_target, Forest, params_Forest)
+#Results = regression(Train_data, Test_data, Train_target, Test_target, Ada, params_Ada)
+R2 = r2_score( Test_target, Results["Predictions"])
+im.plot_results(Test_target, Results["Predictions"], "M_learning_images/prova", R2 = R2)

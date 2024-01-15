@@ -7,8 +7,10 @@ from sklearn.ensemble import AdaBoostRegressor
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import r2_score
 import numpy as np
-
+import matplotlib.pyplot as plt
 import M_learning_images as im
+from sklearn.model_selection import train_test_split
+import seaborn as sns
 
 average_read_length = 270
 images_dir = "M_learning_images/"
@@ -98,7 +100,7 @@ def read_metadata(popolazioni):
 		else: Aureus_r_abundance.append(0)
 	return {"Metadata":metadata, "Abundances_r":r_abundances, "Aureus_r": Aureus_r_abundance}
 
-def regression(Train, Test, Train_target, Test_target, classifier, parameter_space):
+def regression(Train, Test, Train_target, classifier, parameter_space):
 	#GESTISCE LA GRIDSEARCH PER ALGORITMI DI REGRESSIONE 
 	missing_in_Train = [c for c in Test.columns if c not in Train.columns]
 	missing_in_Test = [c for c in Train.columns if c not in Test.columns]
@@ -114,7 +116,7 @@ def regression(Train, Test, Train_target, Test_target, classifier, parameter_spa
 	return({"Best estimator":best, "Predictions":Test_predictions})
 
 campioni = pd.read_csv("Database_campioni.csv", index_col=0)
-#WHICH = "Tutti gli aureus"
+WHICH = "Tutti gli aureus"
 #Modelli allenati su tutti i campioni sintetici (0.01Gbp) (1 0 5 strain) che contengono esclusivamente Aureus S o R.
 #Testati su tutti i campioni reali (0.01Gbp) che contengono esclusivamnte Aureus S o R
 #7/11/23		R2 = 0.9584
@@ -130,18 +132,21 @@ campioni = pd.read_csv("Database_campioni.csv", index_col=0)
 #WHICH = "Tutti gli aureus e Pseudomonas"
 #Modelli allenati su i campioni sintetici (0.01Gbp) (1 0 5 strain) che contengono esclusivamente Aureus S o R e Pseudomonas.
 #Testati su tutti i campioni reali (0.01Gbp) che contengono esclusivamnte Aureus S o R e Pseudomonas.
-#7/11/23		R2 = -0.5682
-#8/11/23		R2 = -0.3971
-#9/11/23		R2 = -0.4749
+#Fiasco
+#Da provare sintetici su sintetici
 #WHICH = "Tutti gli aureus e Coli"
-#7/11/23		R2 = -0.301
-#8/11/23		R2 = -0.2979
-#9/11/23		R2 = -0.1771
-WHICH = "Tutti gli Aureus e Arcobacter"
-#7/11/23		R2 = -1.1409
-#8/11/23		R2 = -0.9358
-#9/11/23		R2 = -1.0985
+#Fiasco
+#Da provare sintetici su sintetici
+#WHICH = "0.01 GB Aureus e Arcobacter"
+#Fiasco
+#Da provare sintetici su sintetici
+#WHICH = "0.1 GB Aureus Arcobacter"
+#Fiasco
+#Sintetici su sintetici funziona
+WHICH = "0.1 GB Aureus Pseudomonas"
+WHICH = "Confornto base"
 
+print(WHICH)
 if(WHICH == "Tutti gli aureus"):
 	t = campioni[campioni["Size"] == 0.01]
 	t = t[t["Coli"] == 0]
@@ -177,14 +182,36 @@ elif(WHICH == "Tutti gli aureus e Coli"):
 	t = t[t["Arcobacter"] == 0]
 	Test = ["samples/" + x for x in t[t["Real/Simul"] == "Real"].index]
 	Train = ["samples/" + x for x in t[t["Real/Simul"] == "Simul"].index]
-elif(WHICH == "Tutti gli Aureus e Arcobacter"):
+elif(WHICH == "0.01 GB Aureus e Arcobacter"):
 	t = campioni[campioni["Size"] == 0.01]
 	t = t[t["Coli"] == 0]
 	t = t[t["Pseudomonas"] == 0]
-	t_2 = t[t["Arcobacter"] != 0]
-	t_2 = t_2[t_2["N strains"] < 7]
-	Test = ["samples/" + x for x in t_2[t_2["Real/Simul"] == "Real"].index]
-	Train = ["samples/" + x for x in t_2[t_2["Real/Simul"] == "Simul"].index]
+	t = t[t["Arcobacter"] != 0]
+	t = t[t["N strains"] < 7]
+	Test = ["samples/" + x for x in t[t["Real/Simul"] == "Real"].index]
+	Train = ["samples/" + x for x in t[t["Real/Simul"] == "Simul"].index]
+elif(WHICH == "0.1 GB Aureus Arcobacter"):
+	t = campioni[campioni["Size"] == 0.1]
+	t = t[t["Coli"] == 0]
+	t = t[t["Pseudomonas"] == 0]
+	t = t[t["Arcobacter"] != 0]
+	t = t[t["N strains"] < 7]
+	Tr = t
+	#Tr = t[["tatuaggio" in x for x in t.index]]
+	Test = ["samples/" + x for x in t[t["Real/Simul"] == "Real"].index]
+	Train = ["samples/" + x for x in Tr[Tr["Real/Simul"] == "Simul"].index]
+elif(WHICH == "0.1 GB Aureus Pseudomonas"):
+	t = campioni[campioni["Size"] == 0.1]
+	t = t[t["Coli"] == 0]
+	t = t[t["Pseudomonas"] != 0]
+	t = t[t["Arcobacter"] == 0]
+	t = t[t["N strains"] < 7]
+	Tr = t
+	Test = ["samples/" + x for x in t[t["Real/Simul"] == "Real"].index]
+	Train = ["samples/" + x for x in Tr[Tr["Real/Simul"] == "Simul"].index]
+elif(WHICH == "Confornto base"):
+	Train = ["samples/Patric_" + x for x in ["Aureus_R", "Aureus_S", "Coli", "Pseudomonas", "Arcobacter"]]
+	Test = ["samples/Decesare_" + x for x in ["Aureus_R", "Aureus_S", "Coli", "Pseudomonas", "Arcobacter"]]
 
 print("Quanti trains: " + str(len(Train)))
 print("Quanti tests: " + str(len(Test)))
@@ -195,8 +222,8 @@ params_El = {"alpha":[0.01]+list(range(1, 100, 10)), "l1_ratio":[0, .1, .5, .7, 
 Forest = RandomForestRegressor(random_state = 0)
 params_Forest = {"criterion":["squared_error", "absolute_error", "friedman_mse", "poisson"]}
 
-Ada =  AdaBoostRegressor(n_estimators=100, random_state=0)
-params_Ada = {"loss":["linear", "square", "exponential"], "learning_rate":[0.5, 1, 1.5, 3, 5]}
+Ada =  AdaBoostRegressor(n_estimators=1000, random_state=0)
+params_Ada = {"loss":["linear", "square", "exponential"], "learning_rate":[0.5, 1, 1.5, 2 ,3, 5,10]}
 
 #Info_controlli = read_bwt_2_various(Train)
 #im.plot_controls(Info_controlli["Antibiotics"], images_dir+"Control_antibiotics.pdf")
@@ -212,10 +239,41 @@ def log_shift(vector):
 
 Train_data = read_bwt_2_aro(Train)
 Test_data = read_bwt_2_aro(Test)
+#Train_data = Train_data.drop(columns=["3000178", "3007014", "3002835"])
+#Test_data = Test_data.drop(columns=["3000178", "3007014"  , "3002835"])
 Train_target= log_shift(read_metadata(Train)["Aureus_r"])
 Test_target= log_shift(read_metadata(Test)["Aureus_r"])
+
+#Data = read_bwt_2_aro(Train)
+#Target = log_shift(read_metadata(Train)["Aureus_r"])
+#Train_data, Test_data, Train_target, Test_target = train_test_split(Data, Target, test_size=0.3, random_state=42)
+
 #Results = regression(Train_data, Test_data, Train_target, Test_target, El, params_El)
-Results = regression(Train_data, Test_data, Train_target, Test_target, Forest, params_Forest)
-#Results = regression(Train_data, Test_data, Train_target, Test_target, Ada, params_Ada)
-R2 = r2_score( Test_target, Results["Predictions"])
+#Results = regression(Train_data, Test_data, Train_target, Test_target, Forest, params_Forest)
+Results = regression(Train_data, Test_data, Train_target, Ada, params_Ada)
+R2 = r2_score(Test_target, Results["Predictions"])
 im.plot_results(Test_target, Results["Predictions"], "M_learning_images/prova", R2 = R2)
+
+#plt.hist(read_metadata(Train)["Aureus_r"], bins=50)  # Choose an appropriate number of bins
+if (True):
+	Train_d = Train_data
+	#Train_t = Train_target
+	Train_d = Train_d.sort_index(axis=1, ascending=False)
+	#Questo non serve per i confronti base
+	#new_index_order = pd.DataFrame(Train_t, index=Train_d.index).sort_values(0).index
+	#Train_d = Train_d.reindex(new_index_order)
+	#Cols = [col for col in Train_d.columns if Train_d[col].mean() > 0]
+	plt.figure(figsize=(15, 6))
+	sns.heatmap(Train_d, cmap='viridis')
+
+if (True):
+	Saturation_LV = 10000
+	Test_d = Test_data
+	Test_d = Test_d.where(Test_d < Saturation_LV, Saturation_LV)
+	#Test_t = Test_target
+	Test_d = Test_d.sort_index(axis=1, ascending=False)
+	#Cols = [col for col in Test_d.columns if Test_d[col].mean() > 0]
+	plt.figure(figsize=(15, 6))
+	sns.heatmap(Test_d, cmap='viridis')
+
+#prova a fare train e test con campioni simulati

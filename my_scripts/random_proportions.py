@@ -10,10 +10,10 @@ def genera(quanti_te_ne_servono):
 #Aureus_S,Aureus_R,Coli,Pseudomonas,Arcobacter
 #Arcobacter è quello suscettibile
 i=0
-while i < 20:
+while i < 40:
     seq = genera(3)
     seq.insert(2,0)
-    seq.insert(2,0)
+    seq.insert(4,0)
     if sum(seq) == 100:
         print(seq)
         i += 1

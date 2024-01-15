@@ -23,7 +23,6 @@ print(Samples_to_create)
 
 def create_samples_from_database(Database, Samples_to_create):
 	for S in Samples_to_create:
-		print(S)
 		SEED = Database.loc[S]["Seed"]
 		os.mkdir(SAMPLES_DIR + S)
 		if Database.loc[S]["Real/Simul"] == "Simul":
@@ -62,10 +61,16 @@ def create_samples_from_database(Database, Samples_to_create):
 				json.dump(dic,j, indent=4)
 
 		elif Database.loc[S]["Real/Simul"] == "Real":
+			if(Database.loc[S]["Size"] == 999):
+				print("Salto "+S)
+				continue
 			Number_of_reads_to_peek = float(Database.loc[S]["Size"]) * 1000000000 / FRAGMENT_SIZE
-			os.system("seqtk sample -s "+str(SEED)+" "+Database.loc[S]["Original sample"]+"_R1_001.fastq.gz"+" "+str(int(Number_of_reads_to_peek))+" > " + SAMPLES_DIR + S + "/reads_1.fastq")
-			os.system("seqtk sample -s "+str(SEED)+" "+Database.loc[S]["Original sample"]+"_R2_001.fastq.gz"+" "+str(int(Number_of_reads_to_peek))+" > " + SAMPLES_DIR + S + "/reads_2.fastq")
-
+			if(os.path.isfile(Database.loc[S]["Original sample"]+"_R1_001.fastq.gz")):
+				os.system("seqtk sample -s "+str(SEED)+" "+Database.loc[S]["Original sample"]+"_R1_001.fastq.gz"+" "+str(int(Number_of_reads_to_peek))+" > " + SAMPLES_DIR + S + "/reads_1.fastq")
+				os.system("seqtk sample -s "+str(SEED)+" "+Database.loc[S]["Original sample"]+"_R2_001.fastq.gz"+" "+str(int(Number_of_reads_to_peek))+" > " + SAMPLES_DIR + S + "/reads_2.fastq")
+			else:
+				print(Database.loc[S]["Original sample"]+"_R1_001.fastq.gz" + " pèroblema")
+				continue
 			with open(SAMPLES_DIR + S + "/input.tsv", mode="w") as Itsv:
 				table = csv.writer(Itsv, delimiter = "\t")
 				table.writerow(["Genome_ID",	"Species_Name",	"Abundance",	"PATRIC_ID",	"Antibiotic",	"Phenotype"])

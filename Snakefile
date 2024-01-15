@@ -121,6 +121,27 @@ rule rgi_bowtie2_paired:
 		cd ..
 		touch {wildcards.sample}/paired_alignment
 		"""
+
+rule rgi_bowtie2_paired_compressed:
+	input:
+		S1 = "{sample}/reads_1.fastq.gz",
+		S2 = "{sample}/reads_2.fastq.gz",
+		r1 = "rgi/card_annotation.log",
+		r2 = "rgi/wildcard_annotation.log"
+	output:
+		"{sample}/paired_alignment",
+		"{sample}/bwt_out/bwt.allele_mapping_data.json"
+	conda: "env.yaml"
+	threads: 5
+	shell:
+		"""
+		mkdir -p {wildcards.sample}/bwt_out
+		cd rgi
+		rgi bwt -1 ../{input.S1} -2 ../{input.S2} -a bowtie2 -n {threads} --clean --include_wildcard -o ../{wildcards.sample}/bwt_out/bwt --local 
+		rm ../{wildcards.sample}/bwt_out/bwt.sorted.length_100.bam*
+		cd ..
+		touch {wildcards.sample}/paired_alignment
+		"""
 		
 rule rgi_bowtie2_single:
 	input:

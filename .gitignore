@@ -17,3 +17,4 @@ trimmomatic_trash_files/*
 LICENSE
 trimmomatic-*
 Example*
+move_to_storage*

@@ -1,17 +1,19 @@
 assembly_K_list = "27,47,67,87,107,127"
 rgi_annotation_alignment_tool = "BLAST"
 k_mer_size = 27
-anno = "2023"
+anno = "2024"
 max_count = 120000000
 wild_card_version = "4.0.0"
 card_version = "3.2.6"
 import os
 
 Populations = os.listdir("samples/",)
+Populations2 = os.listdir("samples2/",)
 
 rule terminated:
 	input:
-				alignments_test = expand("samples/{pop}/paired_alignment", pop=Populations),
+				alignments = expand("samples/{pop}/paired_alignment", pop=Populations),
+				alignments2 = expand("samples2/{pop}/paired_alignment", pop=Populations2)
 # 				kmer_counts = expand("{pop}/single_kmer_count", pop=Populations),
 #				single_end_reads = expand("samples/{pop}/reads.fastq", pop=Populations)
 #				pop_configurations = expand("samples/{pop}/config.ini", pop=Populations)
@@ -23,8 +25,35 @@ rule terminated:
 		touch TERMINATED
 		"""
 
+rule population_set_up_and_Metagesim:
+	input:
+		per_distinguere_questa_regola_da_camisim = "{sample}/USE_METAGESIM",
+		i_1 = "{sample}/input.tsv",
+		i_2 = "{sample}/input.json"
+	output:
+		"{sample}/reads_1.fastq",
+		"{sample}/reads_2.fastq",
+		"{sample}/reads.fastq"
+	conda: "env.yaml"
+	threads: 6
+	resources:
+		mem_mb = 100000
+	shell:
+		"""
+		python my_scripts/generate_metagesim_input.py {input.i_1} {input.i_2}
+		rm -rf {wildcards.sample}/camisim_out
+		mkdir -p tmp
+		python MetaGeSim-AMR/metagenomesimulation2.py {wildcards.sample}/config.ini
+		gunzip {wildcards.sample}/camisim_out/{anno}*/reads/anonymous_reads.fq.gz
+		python my_scripts/split_pair_end.py {wildcards.sample}/camisim_out/{anno}*/reads/anonymous_reads.fq {wildcards.sample}/
+		mv {wildcards.sample}/camisim_out/{anno}*/reads/anonymous_reads.fq {wildcards.sample}/reads.fastq
+		rm -r {wildcards.sample}/camisim_out/{anno}*/reads
+
+		"""
+
 rule population_set_up:
 	input:
+		per_distinguere_questa_regola_da_metagesim = "{sample}/USE_CAMISIM",
 		i_1 = "{sample}/input.tsv",
 		i_2 = "{sample}/input.json"
 	output:
@@ -36,6 +65,7 @@ rule population_set_up:
 
 rule camisim:
 	input:
+		per_distinguere_questa_regola_da_metagesim = "{sample}/USE_CAMISIM",
 		C = "{sample}/config.ini"
 	output:
 		"{sample}/reads_1.fastq",

@@ -59,6 +59,7 @@ def create_samples_from_database(Database, Samples_to_create):
 			"simulated_genomes_per_otu":str(Database.loc[S]["N strains"])}
 			with open(SAMPLES_DIR + S + "/input.json", mode="w") as j:
 				json.dump(dic,j, indent=4)
+			open("USE_CAMISIM", mode="w").close()
 
 		elif Database.loc[S]["Real/Simul"] == "Real":
 			if(Database.loc[S]["Size"] == 999):

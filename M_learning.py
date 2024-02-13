@@ -11,213 +11,17 @@ import matplotlib.pyplot as plt
 import M_learning_images as im
 from sklearn.model_selection import train_test_split
 import seaborn as sns
+import random
 
+#Lunghezza media delle reads simulate e reali, comunque un fattore di normalizzazione che dovrebbe valere per entrambi
+#potrebbe essere diverso tra simulate e reali
 average_read_length = 270
 images_dir = "M_learning_images/"
-
-def read_bwt_2_aro(popolazioni):
-	#Legge le abbondanze delle ARO entries rileate dall'alineamento di rgi bwt
-	#Le aro entries sono identificativi dei resistomi presenti in rgi
-	#Questa funzione restituisce un database con le abbondanze stimate di ogni reistoma per ogni campione
-	resistomes = {}
-	for P in popolazioni:
-		with open(P+"/bwt_out/bwt.allele_mapping_data.json", mode = "r") as f:
-			dati_ = json.load(f)
-			dati = [di for di in dati_ if isinstance(di, dict)]
-			R={}
-			for aro in dati:
-				if str(aro["aro_accession"]) in R.keys():
-					R[str(aro["aro_accession"])] += int(aro["reads"]["all"]) * average_read_length / int(aro["reference"]["sequence_length"])
-				else:
-					R[str(aro["aro_accession"])] = int(aro["reads"]["all"]) * average_read_length / int(aro["reference"]["sequence_length"])
-			resistomes[P] = R
-	Return = pd.DataFrame.from_dict(resistomes, orient="index").fillna(0)
-	return Return
-
-def read_bwt_2_various(popolazioni):
-	#Questa funzione restituisce dei dataframe che contengono features associate ai resistomi
-	#Le "abbondanze" di qeuste feature sono la somma delle abondanze dei resistomi aventi quella feature nel campione
-	#Le features sono:
-	#	Patogeno a cui è associato il resistoma
-	#	Antibiotico per cui viene sviluppata la resistenza
-	#	Farmaco per cui viene sviluppata la resistenza
-	Path = {}
-	Anti = {}
-	Drug = {}
-	for P in popolazioni:
-		with open(P+"/bwt_out/bwt.allele_mapping_data.json", mode = "r") as f:
-			dati_ = json.load(f)
-			dati = [di for di in dati_ if isinstance(di, dict)]
-			Pathogens = {}
-			Antibiotics = {}
-			Drugs_class = {}
-			for aro in dati:
-				No_antibiotics_found_for_aros = 0
-				No_drug_class_found_for_aros = 0
-				if str(aro["observed_in_pathogens"]) in Pathogens.keys():
-					Pathogens[str(aro["observed_in_pathogens"])] += int(aro["reads"]["all"]) * average_read_length / int(aro["reference"]["sequence_length"])
-				else:
-					Pathogens[str(aro["observed_in_pathogens"])] = int(aro["reads"]["all"]) * average_read_length / int(aro["reference"]["sequence_length"])
-				if "Antibiotic" in aro["resistomes"].keys():
-					for anti in aro["resistomes"]["Antibiotic"]:
-						if str(anti) in Antibiotics.keys():
-							Antibiotics[anti] += int(aro["reads"]["all"]) * average_read_length / int(aro["reference"]["sequence_length"])
-						else:
-							Antibiotics[anti] = int(aro["reads"]["all"]) * average_read_length / int(aro["reference"]["sequence_length"])
-				else:
-					No_antibiotics_found_for_aros += 1
-				if "Drug Class" in aro["resistomes"].keys():
-					for d_class in aro["resistomes"]["Drug Class"]:
-						if str(d_class) in Drugs_class.keys():
-							Drugs_class[d_class] += int(aro["reads"]["all"]) * average_read_length / int(aro["reference"]["sequence_length"])
-						else:
-							Drugs_class[d_class] = int(aro["reads"]["all"]) * average_read_length / int(aro["reference"]["sequence_length"])
-				else:
-					No_drug_class_found_for_aros += 1
-		Path[P], Anti[P], Drug[P] = Pathogens, Antibiotics, Drugs_class
-	print(No_drug_class_found_for_aros, "ARO non avevano drug class associate")
-	print(No_antibiotics_found_for_aros, "ARO non avevano antibiotici associati")
-	return({"Pathogens":pd.DataFrame.from_dict(Path, orient="index").fillna(0),\
-		"Antibiotics": pd.DataFrame.from_dict(Anti, orient="index").fillna(0),\
-		"Drugs_class": pd.DataFrame.from_dict(Drug, orient="index").fillna(0)})
-
-def read_metadata(popolazioni):
-	#Legge i metadati del campione, in particolare abbondanza di strains resistenti
-	#DA MODIFICARE IN CASO
-	metadata = {}
-	for P in popolazioni:
-		M_pop = pd.read_csv(P+"/input.tsv", sep="\t")
-		metadata[P] = M_pop
-	[metadata[m]["Phenotype"].replace(["susceptible", "resistant"], [0,1], inplace=True) for m in metadata]
-	r_abundances = []
-	Aureus_r_abundance = []
-	for pop_name in metadata:
-		M = metadata[pop_name]
-		tot = sum(M["Abundance"])
-		r_abundances.append(M[["Abundance", "Phenotype"]].prod(axis=1).sum(axis=0)/tot)
-		if("Aureus_R" in M.values):
-			Aureus_r_abundance.append(M[M["Genome_ID"]=="Aureus_R"].iloc[0]["Abundance"]/tot)
-		else: Aureus_r_abundance.append(0)
-	return {"Metadata":metadata, "Abundances_r":r_abundances, "Aureus_r": Aureus_r_abundance}
-
-def regression(Train, Test, Train_target, classifier, parameter_space):
-	#GESTISCE LA GRIDSEARCH PER ALGORITMI DI REGRESSIONE 
-	missing_in_Train = [c for c in Test.columns if c not in Train.columns]
-	missing_in_Test = [c for c in Train.columns if c not in Test.columns]
-	Test[missing_in_Test] = 0
-	Train[missing_in_Train] = 0
-	Test=Test.reindex(sorted(Test.columns), axis=1)
-	Train=Train.reindex(sorted(Train.columns), axis=1)
-	grid = GridSearchCV(classifier, parameter_space, n_jobs=-1, refit=True).fit(Train, Train_target)
-	best = grid.best_estimator_
-	Test_predictions = best.predict(Test)
-	#print("Target \t Predictions")
-	#print(Test_target, Test_predictions)
-	return({"Best estimator":best, "Predictions":Test_predictions})
-
 campioni = pd.read_csv("Database_campioni.csv", index_col=0)
-WHICH = "Tutti gli aureus"
-#Modelli allenati su tutti i campioni sintetici (0.01Gbp) (1 0 5 strain) che contengono esclusivamente Aureus S o R.
-#Testati su tutti i campioni reali (0.01Gbp) che contengono esclusivamnte Aureus S o R
-#7/11/23		R2 = 0.9584
-#9/11/23		R2 = 0.9404
-#WHICH = "Aureus 1 strain train"
-#Modelli allenati su i campioni sintetici (0.01Gbp) da 1 sola strain che contengono esclusivamente Aureus S o R.
-#Testati su tutti i campioni reali (0.01Gbp) che contengono esclusivamnte Aureus S o R
-#7/11/23		R2 = 0.4297
-#WHICH = "Aureus 5 strain train"
-#Modelli allenati su i campioni sintetici (0.01Gbp) da 5 strain che contengono esclusivamente Aureus S o R.
-#Testati su tutti i campioni reali (0.01Gbp) che contengono esclusivamnte Aureus S o R
-#7/11/23		R2 = 0.9622
-#WHICH = "Tutti gli aureus e Pseudomonas"
-#Modelli allenati su i campioni sintetici (0.01Gbp) (1 0 5 strain) che contengono esclusivamente Aureus S o R e Pseudomonas.
-#Testati su tutti i campioni reali (0.01Gbp) che contengono esclusivamnte Aureus S o R e Pseudomonas.
-#Fiasco
-#Da provare sintetici su sintetici
-#WHICH = "Tutti gli aureus e Coli"
-#Fiasco
-#Da provare sintetici su sintetici
-#WHICH = "0.01 GB Aureus e Arcobacter"
-#Fiasco
-#Da provare sintetici su sintetici
-#WHICH = "0.1 GB Aureus Arcobacter"
-#Fiasco
-#Sintetici su sintetici funziona
-WHICH = "0.1 GB Aureus Pseudomonas"
-WHICH = "Confornto base"
 
-print(WHICH)
-if(WHICH == "Tutti gli aureus"):
-	t = campioni[campioni["Size"] == 0.01]
-	t = t[t["Coli"] == 0]
-	t = t[t["Pseudomonas"] == 0]
-	t = t[t["Arcobacter"] == 0]
-	Test = ["samples/" + x for x in t[t["Real/Simul"] == "Real"].index]
-	Train = ["samples/" + x for x in t[t["Real/Simul"] == "Simul"].index]
-elif(WHICH == "Aureus 1 strain train"):
-	t = campioni[campioni["Size"] == 0.01]
-	t = t[[x in [1,0] for x in t["N strains"]]]
-	t = t[t["Coli"] == 0]
-	t = t[t["Pseudomonas"] == 0]
-	t = t[t["Arcobacter"] == 0]
-	Test = ["samples/" + x for x in t[t["Real/Simul"] == "Real"].index]
-	Train = ["samples/" + x for x in t[t["Real/Simul"] == "Simul"].index]
-elif(WHICH == "Aureus 5 strain train"):
-	t = campioni[campioni["Size"] == 0.01]
-	t = t[[x in [5,0] for x in t["N strains"]]]
-	t = t[t["Coli"] == 0]
-	t = t[t["Pseudomonas"] == 0]
-	t = t[t["Arcobacter"] == 0]
-	Test = ["samples/" + x for x in t[t["Real/Simul"] == "Real"].index]
-	Train = ["samples/" + x for x in t[t["Real/Simul"] == "Simul"].index]	
-elif(WHICH == "Tutti gli aureus e Pseudomonas"):
-	t = campioni[campioni["Size"] == 0.01]
-	t = t[t["Coli"] == 0]
-	t = t[t["Arcobacter"] == 0]
-	Test = ["samples/" + x for x in t[t["Real/Simul"] == "Real"].index]
-	Train = ["samples/" + x for x in t[t["Real/Simul"] == "Simul"].index]
-elif(WHICH == "Tutti gli aureus e Coli"):
-	t = campioni[campioni["Size"] == 0.01]
-	t = t[t["Pseudomonas"] == 0]
-	t = t[t["Arcobacter"] == 0]
-	Test = ["samples/" + x for x in t[t["Real/Simul"] == "Real"].index]
-	Train = ["samples/" + x for x in t[t["Real/Simul"] == "Simul"].index]
-elif(WHICH == "0.01 GB Aureus e Arcobacter"):
-	t = campioni[campioni["Size"] == 0.01]
-	t = t[t["Coli"] == 0]
-	t = t[t["Pseudomonas"] == 0]
-	t = t[t["Arcobacter"] != 0]
-	t = t[t["N strains"] < 7]
-	Test = ["samples/" + x for x in t[t["Real/Simul"] == "Real"].index]
-	Train = ["samples/" + x for x in t[t["Real/Simul"] == "Simul"].index]
-elif(WHICH == "0.1 GB Aureus Arcobacter"):
-	t = campioni[campioni["Size"] == 0.1]
-	t = t[t["Coli"] == 0]
-	t = t[t["Pseudomonas"] == 0]
-	t = t[t["Arcobacter"] != 0]
-	t = t[t["N strains"] < 7]
-	Tr = t
-	#Tr = t[["tatuaggio" in x for x in t.index]]
-	Test = ["samples/" + x for x in t[t["Real/Simul"] == "Real"].index]
-	Train = ["samples/" + x for x in Tr[Tr["Real/Simul"] == "Simul"].index]
-elif(WHICH == "0.1 GB Aureus Pseudomonas"):
-	t = campioni[campioni["Size"] == 0.1]
-	t = t[t["Coli"] == 0]
-	t = t[t["Pseudomonas"] != 0]
-	t = t[t["Arcobacter"] == 0]
-	t = t[t["N strains"] < 7]
-	Tr = t
-	Test = ["samples/" + x for x in t[t["Real/Simul"] == "Real"].index]
-	Train = ["samples/" + x for x in Tr[Tr["Real/Simul"] == "Simul"].index]
-elif(WHICH == "Confornto base"):
-	Train = ["samples/Patric_" + x for x in ["Aureus_R", "Aureus_S", "Coli", "Pseudomonas", "Arcobacter"]]
-	Test = ["samples/Decesare_" + x for x in ["Aureus_R", "Aureus_S", "Coli", "Pseudomonas", "Arcobacter"]]
-
-print("Quanti trains: " + str(len(Train)))
-print("Quanti tests: " + str(len(Test)))
-
+#Declaring the models and initializing their grid of hyperparameters
 El = ElasticNet(max_iter=100000, tol=0.05)
-params_El = {"alpha":[0.01]+list(range(1, 100, 10)), "l1_ratio":[0, .1, .5, .7, .9, .95, .99, 1]}
+params_El = {"alpha":[0, 0.001, 0.01]+list(range(1, 100, 10)), "l1_ratio":[0, .1, .5, .7, .9, .95, .99, 1]}
 
 Forest = RandomForestRegressor(random_state = 0)
 params_Forest = {"criterion":["squared_error", "absolute_error", "friedman_mse", "poisson"]}
@@ -225,55 +29,315 @@ params_Forest = {"criterion":["squared_error", "absolute_error", "friedman_mse",
 Ada =  AdaBoostRegressor(n_estimators=1000, random_state=0)
 params_Ada = {"loss":["linear", "square", "exponential"], "learning_rate":[0.5, 1, 1.5, 2 ,3, 5,10]}
 
-#Info_controlli = read_bwt_2_various(Train)
-#im.plot_controls(Info_controlli["Antibiotics"], images_dir+"Control_antibiotics.pdf")
-#im.plot_controls(Info_controlli["Drugs_class"], images_dir+"Control_drugs.pdf")
-#im.plot_controls(Info_controlli["Pathogens"], images_dir+"Control_pathogens.pdf")
-#[Info_controlli[c].to_csv("Controllo_"+c+".tsv", sep="\t") for c in Info_controlli]
+#%%
+#SELECTING THE MODEL TO USE
+model = Ada
+params = params_Ada
 
-def log_ods(vector):
-	return(np.log([vv/(1 - vv) for vv in vector]))
+#Deciding which samples to peack from the database and defining the train and test sets
+WHICH = "AureusS_Arcobacter_AureusR_5_strain"
+print(WHICH)
+if(WHICH == "Aureus_1_strain"):
+	t = campioni[campioni["Size"] == 0.01]
+	t = t[[x in [1,0] for x in t["N strains"]]]
+	t = t[t["Coli"] == 0]
+	t = t[t["Pseudomonas"] == 0]
+	t = t[t["Arcobacter"] == 0]
+	Test = ["samples/" + x for x in t[t["Real/Simul"] == "Real"].index]
+	Train = ["samples/" + x for x in t[t["Real/Simul"] == "Simul"].index]
+	print("Aureus 1 strain train")
+	print("Quanti trains: " + str(len(Train)))
+	print("Quanti tests: " + str(len(Test)))
+elif(WHICH == "Aureus_5_strain"):
+	t = campioni[campioni["Size"] == 0.01]
+	t = t[[x in [5,0] for x in t["N strains"]]]
+	t = t[t["Coli"] == 0]
+	t = t[t["Pseudomonas"] == 0]
+	t = t[t["Arcobacter"] == 0]
+	Test = ["samples/" + x for x in t[t["Real/Simul"] == "Real"].index]
+	Train = ["samples/" + x for x in t[t["Real/Simul"] == "Simul"].index]
+	print("Aureus 5 strain train")
+	print("Quanti trains: " + str(len(Train)))
+	print("Quanti tests: " + str(len(Test)))
+elif(WHICH == "AureusS_Arcobacter_AureusR_1_strain"):
+	t = campioni[campioni["Size"] == 0.01]
+	t = t[[x in [1,0] for x in t["N strains"]]]
+	t = t[t["Aureus_S"] != 0]
+	t = t[t["Aureus_R"] != 0]
+	t = t[t["Coli"] == 0]
+	t = t[t["Pseudomonas"] == 0]
+	t = t[t["Arcobacter"] != 0]
+	Test = ["samples/" + x for x in t[t["Real/Simul"] == "Real"].index]
+	Train = ["samples/" + x for x in t[t["Real/Simul"] == "Simul"].index]
+	print("Aureus_S e Arcobacter e Aureus_R 1 strain")
+	print("Quanti trains: " + str(len(Train)))
+	print("Quanti tests: " + str(len(Test)))
+elif(WHICH == "AureusS_Arcobacter_Coli_1_strain"):
+	t = campioni[campioni["Size"] == 0.01]
+	t = t[[x in [1,0] for x in t["N strains"]]]
+	t = t[t["Aureus_S"] != 0]
+	t = t[t["Aureus_R"] == 0]
+	t = t[t["Coli"] != 0]
+	t = t[t["Pseudomonas"] == 0]
+	t = t[t["Arcobacter"] != 0]
+	Test = ["samples/" + x for x in t[t["Real/Simul"] == "Real"].index]
+	Train = ["samples/" + x for x in t[t["Real/Simul"] == "Simul"].index]
+	print("Aureus_S e Arcobacter e Coli 1 strain")
+	print("Quanti trains: " + str(len(Train)))
+	print("Quanti tests: " + str(len(Test)))
+elif(WHICH == "AureusS_Arcobacter_Pseudomonas_1_strain"):
+	t = campioni[campioni["Size"] == 0.01]
+	t = t[[x in [1,0] for x in t["N strains"]]]
+	t = t[t["Aureus_S"] != 0]
+	t = t[t["Aureus_R"] == 0]
+	t = t[t["Coli"] == 0]
+	t = t[t["Pseudomonas"] != 0]
+	t = t[t["Arcobacter"] != 0]
+	Test = ["samples/" + x for x in t[t["Real/Simul"] == "Real"].index]
+	Train = ["samples/" + x for x in t[t["Real/Simul"] == "Simul"].index]
+	print("Aureus_S e Arcobacter e Pseudomonas 1 strain")
+	print("Quanti trains: " + str(len(Train)))
+	print("Quanti tests: " + str(len(Test)))
+elif(WHICH == "AureusS_Arcobacter_AureusR_5_strain"):
+	t = campioni[campioni["Size"] == 0.01]
+	t = t[[x in [5,0] for x in t["N strains"]]]
+	t = t[t["Aureus_S"] != 0]
+	t = t[t["Aureus_R"] != 0]
+	t = t[t["Coli"] == 0]
+	t = t[t["Pseudomonas"] == 0]
+	t = t[t["Arcobacter"] != 0]
+	Test = ["samples/" + x for x in t[t["Real/Simul"] == "Real"].index]
+	Train = ["samples/" + x for x in t[t["Real/Simul"] == "Simul"].index]
+	print("Aureus_S e Arcobacter e Aureus_R 5 strain")
+	print("Quanti trains: " + str(len(Train)))
+	print("Quanti tests: " + str(len(Test)))
+elif(WHICH == "AureusS_Arcobacter_AureusR_5_strain_0.1Gbp"):
+	t = campioni[campioni["Size"] == 0.1]
+	t = t[[x in [5,0] for x in t["N strains"]]]
+	t = t[t["Aureus_S"] != 0]
+	t = t[t["Aureus_R"] != 0]
+	t = t[t["Coli"] == 0]
+	t = t[t["Pseudomonas"] == 0]
+	t = t[t["Arcobacter"] != 0]
+	Test = ["samples/" + x for x in t[t["Real/Simul"] == "Real"].index]
+	Train = ["samples/" + x for x in t[t["Real/Simul"] == "Simul"].index]
+	print("Aureus_S e Arcobacter e Aureus_R 5 strain")
+	print("Quanti trains: " + str(len(Train)))
+	print("Quanti tests: " + str(len(Test)))
+elif(WHICH == "AureusS_Arcobacter_Coli_5_strain"):
+	t = campioni[campioni["Size"] == 0.01]
+	t = t[[x in [5,0] for x in t["N strains"]]]
+	t = t[t["Aureus_S"] != 0]
+	t = t[t["Aureus_R"] == 0]
+	t = t[t["Coli"] != 0]
+	t = t[t["Pseudomonas"] == 0]
+	t = t[t["Arcobacter"] != 0]
+	Test = ["samples/" + x for x in t[t["Real/Simul"] == "Real"].index]
+	Train = ["samples/" + x for x in t[t["Real/Simul"] == "Simul"].index]
+	print("Aureus_S e Arcobacter e Coli 1 strain")
+	print("Quanti trains: " + str(len(Train)))
+	print("Quanti tests: " + str(len(Test)))
+elif(WHICH == "AureusS_Arcobacter_e_Pseudomonas_5_strain"):
+	t = campioni[campioni["Size"] == 0.01]
+	t = t[[x in [5,0] for x in t["N strains"]]]
+	t = t[t["Aureus_S"] != 0]
+	t = t[t["Aureus_R"] == 0]
+	t = t[t["Coli"] == 0]
+	t = t[t["Pseudomonas"] != 0]
+	t = t[t["Arcobacter"] != 0]
+	Test = ["samples/" + x for x in t[t["Real/Simul"] == "Real"].index]
+	Train = ["samples/" + x for x in t[t["Real/Simul"] == "Simul"].index]
+	print("Aureus_S e Arcobacter e Pseudomonas 5 strain")
+	print("Quanti trains: " + str(len(Train)))
+	print("Quanti tests: " + str(len(Test)))
+elif(WHICH == "Tutti_tranne_AureusR"):
+	t = campioni[campioni["Size"] == 0.01]
+	t = t[[x in [1,0] for x in t["N strains"]]]
+	t = t[t["Aureus_S"] != 0]
+	t = t[t["Aureus_R"] == 0]
+	t = t[t["Coli"] != 0]
+	t = t[t["Pseudomonas"] != 0]
+	t = t[t["Arcobacter"] != 0]
+	Test = ["samples/" + x for x in t[t["Real/Simul"] == "Real"].index]
+	Train = ["samples/" + x for x in t[t["Real/Simul"] == "Simul"].index]
+	print("Aureus_S e Arcobacter e Pseudomonas 1 strain")
+	print("Quanti trains: " + str(len(Train)))
+	print("Quanti tests: " + str(len(Test)))
+elif(WHICH == "Tutti_tranne_Coli"):
+	t = campioni[campioni["Size"] == 0.01]
+	t = t[[x in [1,0] for x in t["N strains"]]]
+	t = t[t["Aureus_S"] != 0]
+	t = t[t["Aureus_R"] != 0]
+	t = t[t["Coli"] == 0]
+	t = t[t["Pseudomonas"] != 0]
+	t = t[t["Arcobacter"] != 0]
+	Test = ["samples/" + x for x in t[t["Real/Simul"] == "Real"].index]
+	Train = ["samples/" + x for x in t[t["Real/Simul"] == "Simul"].index]
+	print("Aureus_S e Arcobacter e Pseudomonas 1 strain")
+	print("Quanti trains: " + str(len(Train)))
+	print("Quanti tests: " + str(len(Test)))
+elif(WHICH == "Tutti_tranne_Pseudomonas"):
+	t = campioni[campioni["Size"] == 0.01]
+	t = t[[x in [1,0] for x in t["N strains"]]]
+	t = t[t["Aureus_S"] != 0]
+	t = t[t["Aureus_R"] != 0]
+	t = t[t["Coli"] != 0]
+	t = t[t["Pseudomonas"] == 0]
+	t = t[t["Arcobacter"] != 0]
+	Test = ["samples/" + x for x in t[t["Real/Simul"] == "Real"].index]
+	Train = ["samples/" + x for x in t[t["Real/Simul"] == "Simul"].index]
+	print("Aureus_S e Arcobacter e Pseudomonas 1 strain")
+	print("Quanti trains: " + str(len(Train)))
+	print("Quanti tests: " + str(len(Test)))
+elif(WHICH == "Tutti"):
+	t = campioni[campioni["Size"] == 0.01]
+	t = t[[x in [5,0] for x in t["N strains"]]]
+	t = t[t["Aureus_S"] != 0]
+	t = t[t["Aureus_R"] != 0]
+	t = t[t["Coli"] != 0]
+	t = t[t["Pseudomonas"] != 0]
+	t = t[t["Arcobacter"] != 0]
+	Test = ["samples/" + x for x in t[t["Real/Simul"] == "Real"].index]
+	Train = ["samples/" + x for x in t[t["Real/Simul"] == "Simul"].index]
+	print("Aureus_S e Arcobacter e Pseudomonas 1 strain")
+	print("Quanti trains: " + str(len(Train)))
+	print("Quanti tests: " + str(len(Test)))
+elif(WHICH == "Synth_on_Synth_AureusS_Arcobacter_AureusR"):
+	t = campioni[campioni["Size"] == 0.01]
+	t = t[[x in [1,0] for x in t["N strains"]]]
+	t = t[t["Aureus_S"] != 0]
+	t = t[t["Aureus_R"] != 0]
+	t = t[t["Coli"] == 0]
+	t = t[t["Pseudomonas"] == 0]
+	t = t[t["Arcobacter"] != 0]
+	Simul = ["samples/" + x for x in t[t["Real/Simul"] == "Simul"].index]
+	Train, Test = train_test_split(Simul, test_size=0.1, random_state=0) 
+	print("Aureus_S e Arcobacter e Pseudomonas 1 strain")
+	print("Quanti trains: " + str(len(Train)))
+	print("Quanti tests: " + str(len(Test)))
+elif(WHICH == "Synth_on_Synth_AureusS_Arcobacter_Coli"):
+	t = campioni[campioni["Size"] == 0.01]
+	t = t[[x in [1,0] for x in t["N strains"]]]
+	t = t[t["Aureus_S"] != 0]
+	t = t[t["Aureus_R"] == 0]
+	t = t[t["Coli"] != 0]
+	t = t[t["Pseudomonas"] == 0]
+	t = t[t["Arcobacter"] != 0]
+	Simul = ["samples/" + x for x in t[t["Real/Simul"] == "Simul"].index]
+	Train, Test = train_test_split(Simul, test_size=0.1, random_state=0) 
+	print("Aureus_S e Arcobacter e Pseudomonas 1 strain")
+	print("Quanti trains: " + str(len(Train)))
+	print("Quanti tests: " + str(len(Test)))
+elif(WHICH == "Synth_on_Synth_AureusS_Arcobacter_Pseudomonas"):
+	t = campioni[campioni["Size"] == 0.01]
+	t = t[[x in [1,0] for x in t["N strains"]]]
+	t = t[t["Aureus_S"] != 0]
+	t = t[t["Aureus_R"] == 0]
+	t = t[t["Coli"] == 0]
+	t = t[t["Pseudomonas"] != 0]
+	t = t[t["Arcobacter"] != 0]
+	Simul = ["samples/" + x for x in t[t["Real/Simul"] == "Simul"].index]
+	Train, Test = train_test_split(Simul, test_size=0.1, random_state=0) 
+	print("Aureus_S e Arcobacter e Pseudomonas 1 strain")
+	print("Quanti trains: " + str(len(Train)))
+	print("Quanti tests: " + str(len(Test)))
+elif(WHICH == "Synth_on_Synth_No_Aureus_R"):
+	t = campioni[campioni["Size"] == 0.01]
+	t = t[[x in [1,0] for x in t["N strains"]]]
+	t = t[t["Aureus_S"] != 0]
+	t = t[t["Aureus_R"] == 0]
+	t = t[t["Coli"] != 0]
+	t = t[t["Pseudomonas"] != 0]
+	t = t[t["Arcobacter"] != 0]
+	Simul = ["samples/" + x for x in t[t["Real/Simul"] == "Simul"].index]
+	Train, Test = train_test_split(Simul, test_size=0.1, random_state=0) 
+	print("Aureus_S e Arcobacter e Pseudomonas 1 strain")
+	print("Quanti trains: " + str(len(Train)))
+	print("Quanti tests: " + str(len(Test)))
+elif(WHICH == "Synth_on_Synth_No_Coli"):
+	t = campioni[campioni["Size"] == 0.01]
+	t = t[[x in [1,0] for x in t["N strains"]]]
+	t = t[t["Aureus_S"] != 0]
+	t = t[t["Aureus_R"] != 0]
+	t = t[t["Coli"] == 0]
+	t = t[t["Pseudomonas"] != 0]
+	t = t[t["Arcobacter"] != 0]
+	Simul = ["samples/" + x for x in t[t["Real/Simul"] == "Simul"].index]
+	Train, Test = train_test_split(Simul, test_size=0.1, random_state=0) 
+	print("Aureus_S e Arcobacter e Pseudomonas 1 strain")
+	print("Quanti trains: " + str(len(Train)))
+	print("Quanti tests: " + str(len(Test)))
+elif(WHICH == "Synth_on_Synth_No_Pseudomonas"):
+	t = campioni[campioni["Size"] == 0.01]
+	t = t[[x in [1,0] for x in t["N strains"]]]
+	t = t[t["Aureus_S"] != 0]
+	t = t[t["Aureus_R"] != 0]
+	t = t[t["Coli"] != 0]
+	t = t[t["Pseudomonas"] == 0]
+	t = t[t["Arcobacter"] != 0]
+	Simul = ["samples/" + x for x in t[t["Real/Simul"] == "Simul"].index]
+	Train, Test = train_test_split(Simul, test_size=0.1, random_state=0) 
+	print("Aureus_S e Arcobacter e Pseudomonas 1 strain")
+	print("Quanti trains: " + str(len(Train)))
+	print("Quanti tests: " + str(len(Test)))
+elif(WHICH == "Sinth_on_synth_AureusS_Arcobacter_AureusR_5_strain_0.1Gbp"):
+	t = campioni[campioni["Size"] == 0.1]
+	t = t[[x in [5,0] for x in t["N strains"]]]
+	t = t[t["Aureus_S"] != 0]
+	t = t[t["Aureus_R"] != 0]
+	t = t[t["Coli"] == 0]
+	t = t[t["Pseudomonas"] == 0]
+	t = t[t["Arcobacter"] != 0]
+	Simul = ["samples/" + x for x in t[t["Real/Simul"] == "Simul"].index]
+	Train, Test = train_test_split(Simul, test_size=0.1, random_state=0) 
+	print("Aureus_S e Arcobacter e Pseudomonas 1 strain")
+	print("Quanti trains: " + str(len(Train)))
+	print("Quanti tests: " + str(len(Test)))
+elif(WHICH == "Confornto base"):
+	Train = ["samples/Patric_" + x for x in ["Aureus_R", "Aureus_S", "Coli", "Pseudomonas", "Arcobacter"]]
+	Test = ["samples/Decesare_" + x for x in ["Aureus_R", "Aureus_S", "Coli", "Pseudomonas", "Arcobacter"]]
 
-def log_shift(vector):
-	return(np.log([v+1 for v in vector]))
+#################READING DATA
+#Features (this funciton is also scaling the features to make them relatable between samples)
+Train_data = im.read_bwt_2_aro(Train)
+Test_data = im.read_bwt_2_aro(Test)
+#Dealing with columns absent in one of the two datasets 
+missing_in_Train = [c for c in Test_data.columns if c not in Train_data.columns]
+missing_in_Test = [c for c in Train_data.columns if c not in Test_data.columns]
+if False:
+	Test_data[missing_in_Test] = 0
+	Train_data[missing_in_Train] = 0
+else:
+	Test_data = Test_data.drop(columns=missing_in_Train)
+	Train_data = Train_data.drop(columns=missing_in_Test)
+Test_data = Test_data.sort_index(axis=1)
+Train_data = Train_data.sort_index(axis=1)
+print("Sto usando le seguenti colonne nel fit")
+print(Train_data.columns)
+#Manual feature selection
+MANUAL_FEATURE_SELECTION = False
+if MANUAL_FEATURE_SELECTION:
+	selected = ["3000216"]#, "3004517"]
+	Train_data = Train_data[selected]
+	Test_data = Test_data[selected]
 
-Train_data = read_bwt_2_aro(Train)
-Test_data = read_bwt_2_aro(Test)
-#Train_data = Train_data.drop(columns=["3000178", "3007014", "3002835"])
-#Test_data = Test_data.drop(columns=["3000178", "3007014"  , "3002835"])
-Train_target= log_shift(read_metadata(Train)["Aureus_r"])
-Test_target= log_shift(read_metadata(Test)["Aureus_r"])
+#reading targets
+Train_target= im.read_metadata(Train)["Abundances_r"]
+Test_target= im.read_metadata(Test)["Abundances_r"]
 
-#Data = read_bwt_2_aro(Train)
-#Target = log_shift(read_metadata(Train)["Aureus_r"])
-#Train_data, Test_data, Train_target, Test_target = train_test_split(Data, Target, test_size=0.3, random_state=42)
-
-#Results = regression(Train_data, Test_data, Train_target, Test_target, El, params_El)
-#Results = regression(Train_data, Test_data, Train_target, Test_target, Forest, params_Forest)
-Results = regression(Train_data, Test_data, Train_target, Ada, params_Ada)
-R2 = r2_score(Test_target, Results["Predictions"])
-im.plot_results(Test_target, Results["Predictions"], "M_learning_images/prova", R2 = R2)
-
-#plt.hist(read_metadata(Train)["Aureus_r"], bins=50)  # Choose an appropriate number of bins
-if (True):
-	Train_d = Train_data
-	#Train_t = Train_target
-	Train_d = Train_d.sort_index(axis=1, ascending=False)
-	#Questo non serve per i confronti base
-	#new_index_order = pd.DataFrame(Train_t, index=Train_d.index).sort_values(0).index
-	#Train_d = Train_d.reindex(new_index_order)
-	#Cols = [col for col in Train_d.columns if Train_d[col].mean() > 0]
-	plt.figure(figsize=(15, 6))
-	sns.heatmap(Train_d, cmap='viridis')
-
-if (True):
-	Saturation_LV = 10000
-	Test_d = Test_data
-	Test_d = Test_d.where(Test_d < Saturation_LV, Saturation_LV)
-	#Test_t = Test_target
-	Test_d = Test_d.sort_index(axis=1, ascending=False)
-	#Cols = [col for col in Test_d.columns if Test_d[col].mean() > 0]
-	plt.figure(figsize=(15, 6))
-	sns.heatmap(Test_d, cmap='viridis')
-
-#prova a fare train e test con campioni simulati
+#########################REGRESSION
+#Optimizing hyperparameters
+grid = GridSearchCV(model, params, n_jobs=-1, refit=True)
+#Fitting the model
+grid.fit(Train_data, list(Train_target.values()))
+#Retreaving best estimator
+best = grid.best_estimator_
+#Making predicitons and evaluate performances
+Test_predictions = grid.predict(Test_data)
+R2 = r2_score(list(Test_target.values()), Test_predictions) #il R2 ridotto non mi sembra adatto, non ho un numero preciso di parametri che fitto
+im.plot_results(list(Test_target.values()), Test_predictions, "M_learning_images/" + WHICH + ".png", R2 = R2)
+#Feature importance
+F_imp = im.feature_importance(Train_data, best, "M_learning_images/"+WHICH+"_feature_importance.png")
+#Ordered heatmap
+im.heatmap_abundance(Test_data, Target = Test_target, F_imp = F_imp, Normalize = True, filename = "M_learning_images/"+WHICH+"_Test_heatmap.png")
+im.heatmap_abundance(Train_data, Target = Train_target, F_imp = F_imp, Normalize = True, filename = "M_learning_images/"+WHICH+"_Train_heatmap.png")

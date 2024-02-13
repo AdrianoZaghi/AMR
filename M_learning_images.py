@@ -7,20 +7,35 @@ from operator import itemgetter
 import json
 import seaborn as sns
 import pandas as pd
+import numpy as np
 average_read_length = 270
 
-def plot_results(target, prediction, filename = None, R2 = 666):
+def plot_results(target, prediction, filename = None, R2 = None):
+	"""Plots the target vs the prediction of a model
+	The is a scatter plot: in an optimal case, the points should be on the line y=x
+	Args:
+		target (list): the target values
+		prediction (list): the predicted values
+		filename (str): the name of the file where the plot will be saved
+		R2 (float): the R2 score of the model
+	
+	"""
 	plt.plot(target, prediction, 'ro')
 	x=[max([min(target)-0.01, min(prediction)-0.01]), min([max(target)+0.01,max(prediction)+0.01])]
 	y=x
 	plt.plot(x, y, 'k:', lw=2)
 	plt.xlabel("Target")
 	plt.ylabel("Predictions")
-	plt.title("Target vs Prediction: R2 = " + str(round(R2,4)))
+	title = "Target vs Prediction"
+	if R2 is not None:
+		title += ": R2 = " + str(round(R2,4))
+	plt.title(title)
 	if not filename == None:
 		plt.savefig(filename)
 
 def plot_controls(dataf, filename, n_columns=5):
+	"""Non mi ricordo cosa fa bene, ma va usata con i campioni con una sola pecie per vedere le features dei geni e se coincidono con il batterio nel campione
+	"""
 	trans=dataf.T
 	pdf = matplotlib.backends.backend_pdf.PdfPages(filename)
 	for c in trans.columns:
@@ -35,9 +50,12 @@ def plot_controls(dataf, filename, n_columns=5):
 	return(control_biggest)
 
 def read_bwt_2_aro(popolazioni):
-	#Legge le abbondanze delle ARO entries rileate dall'alineamento di rgi bwt
-	#Le aro entries sono identificativi dei resistomi presenti in rgi
-	#Questa funzione restituisce un database con le abbondanze stimate di ogni reistoma per ogni campione
+	"""Reads the abundances of the ARO entries detected by the rgi bwt alignment
+	The ARO entries are identifiers of the resistomes present in the rgi
+	This function returns a database with the estimated abundances of each resistome for each sample
+	Args:
+		popolazioni (list): the list of the populations paths
+	"""
 	resistomes = {}
 	for P in popolazioni:
 		with open(P+"/bwt_out/bwt.allele_mapping_data.json", mode = "r") as f:
@@ -55,12 +73,14 @@ def read_bwt_2_aro(popolazioni):
 	return Return
 
 def read_bwt_2_various(popolazioni):
-	#Questa funzione restituisce dei dataframe che contengono features associate ai resistomi
-	#Le "abbondanze" di qeuste feature sono la somma delle abondanze dei resistomi aventi quella feature nel campione
-	#Le features sono:
-	#	Patogeno a cui è associato il resistoma
-	#	Antibiotico per cui viene sviluppata la resistenza
-	#	Farmaco per cui viene sviluppata la resistenza
+	"""This function returns dataframeS containing features associated to the resistomes
+	The abundances of these features are the sum of the abundances of the resistomes having that feature in the sample
+	The features are stored in a dictionaty with the following keys:
+		"Pathogens" Pathogen associated to the resistome
+		"Antibiotics" Antibiotic for which resistance is developed
+		"Drug_class" Drug for which resistance is developed
+	Args:
+		popolazioni (list): the list of the populations paths"""
 	Path = {}
 	Anti = {}
 	Drug = {}
@@ -102,8 +122,14 @@ def read_bwt_2_various(popolazioni):
 		"Drugs_class": pd.DataFrame.from_dict(Drug, orient="index").fillna(0)})
 
 def read_metadata(popolazioni):
-	#Legge i metadati del campione, in particolare abbondanza di strains resistenti
-	#DA MODIFICARE IN CASO
+	"""Reads the metadata of the populations
+	The metadata is the file input.tsv in the populations folder
+	Returns a dictionary with:
+		"Metadata" A dataframe for each population containing all the metadata
+		"Abundances_r" The abundance of the resistant phenotype for each population
+		"Aureus_r" The abundance of the Aureus_R genome for each population
+	Args:
+		popolazioni (list): the list of the populations paths"""
 	metadata = {}
 	for P in popolazioni:
 		M_pop = pd.read_csv(P+"/input.tsv", sep="\t")
@@ -121,7 +147,18 @@ def read_metadata(popolazioni):
 	return {"Metadata":metadata, "Abundances_r":r_abundances, "Aureus_r": Aureus_r_abundance}
 
 def regression(Train, Test, Train_target, classifier, parameter_space, Keep_columns_that_appear_just_in_one_set = False):
-	#GESTISCE LA GRIDSEARCH PER ALGORITMI DI REGRESSIONE 
+	"""Performs a regression on the Train data and predicts the Test data
+	Returns a dictionary with:
+		"Best estimator": the best model found by the grid search
+		"Predictions": the predictions of the model on the Test data
+	Args:
+		Train (DataFrame): the data used for training
+		Test (DataFrame): the data used for testing
+		Train_target (list): the target values for the training
+		classifier (sklearn model): the model used for the regression, IT NEEDS TO HAVE THE .fit() METHOD
+		parameter_space (dict): the hyperparameters of the model
+		Keep_columns_that_appear_just_in_one_set (bool) = False: if True, the columns that appear only in Train or Test will be kept and filled with 0, if False, they will be dropped
+	""" 
 	missing_in_Train = [c for c in Test.columns if c not in Train.columns]
 	missing_in_Test = [c for c in Train.columns if c not in Test.columns]
 	if Keep_columns_that_appear_just_in_one_set:
@@ -155,6 +192,12 @@ def normalize_counts(data):
 	r = data.apply(lambda x: x / x.max())
 
 def feature_importance(Train_data, fitted_model, filename = None):
+	"""Plots the feature importance of a model and returns a dictionary with the feature importance
+	At the moment, it works only with the ElasticNet model and the ensambles models of sklearn: RandomForest, AdaBoost....
+	Args:
+		Train_data (DataFrame): the data used for training
+		fitted_model (sklearn model): the model used for the regression, IT NEEDS TO HAVE THE .fit() METHOD
+		filename (str) = None: the name of the file where the plot will be saved"""
 	if(isinstance(fitted_model,ElasticNet)):
 		F_imp = fitted_model.coef_
 	else:
@@ -170,6 +213,19 @@ def feature_importance(Train_data, fitted_model, filename = None):
 	return F_imp
 
 def heatmap_abundance(Data, Target = None, F_imp = None, Normalize = False, saturation = -1,filename = None):
+	"""Plots a heatmap of the data
+	If Target is not None, the rows will be sorted by the target values
+	If F_imp is not None, the columns will be sorted by the feature importance
+	If Normalize is True, the values in each column will be normalized by the maximum value in the column
+	If saturation is not >0, the values higher than saturation level will be set to saturation so that lower values are more visible
+	Args:
+		Data (DataFrame): the data used for the heatmap
+		Target (list) = None: the target values
+		F_imp (list) = None: the feature importance
+		Normalize (bool) = False: if True, the data will be normalized
+		saturation (int) = -1: the maximum value of the data
+		filename (str) = None: the name of the file where the plot will be saved
+	"""
 	if Target is not None:
 		sorted_rows = dict(sorted(Target.items(), key=lambda item: item[1]))
 		d = Data.reindex(sorted_rows)

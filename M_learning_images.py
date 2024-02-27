@@ -179,14 +179,16 @@ def regression(Train, Test, Train_target, classifier, parameter_space, Keep_colu
 	#print(Test_target, Test_predictions)
 	return({"Best estimator":best, "Predictions":Test_predictions})
 
-def log_ods(vector):
+def log_odds(dict, upper_saturation = 0.99999, lower_saturation = 0.00001):
 	#	Ci metto un -50 per evitare che il log di 0 dia errore
-	ods = [vv/(1 - vv) for vv in vector]
-	log_ods = [np.log(vv) if vv < 20 else np.log(20,) for vv in ods]
-	return([vv if vv > -4 else -4 for vv in log_ods])
+	adjust_boundaries  = {k : 0.99999 if v == 1 else v for k, v in dict.items()}
+	adjust_boundaries  = {k : 0.00001 if v == 0 else v for k, v in adjust_boundaries.items()}
+	ods = {k : v/(1 - v) for k, v in adjust_boundaries.items()}
+	return {k : np.log(v) for k, v in ods.items()}
+	
 
-def log_shift(vector):
-	return(np.log([v+1 for v in vector]))
+def log_shift(dict, shift = 1):
+	return {k: np.log(v + shift) for k, v in dict.items()}
 
 def normalize_counts(data):
 	r = data.apply(lambda x: x / x.max())

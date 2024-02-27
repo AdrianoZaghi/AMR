@@ -10,6 +10,7 @@ TERMINATED
 *.pdf
 __pycache__
 samples/*
+samples_2/*
 M_learning_images/*
 fastqc_out/*
 Real_samples_de_Caesar/*
@@ -19,3 +20,7 @@ trimmomatic-*
 Example*
 move_to_storage*
 samples2/*
+old*
+Old*
+SPAdes*
+Spades*

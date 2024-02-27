@@ -8,12 +8,12 @@ card_version = "3.2.6"
 import os
 
 Populations = os.listdir("samples/",)
-Populations2 = os.listdir("samples2/",)
+Populations2 = os.listdir("samples_2/",)
 
 rule terminated:
 	input:
 				alignments = expand("samples/{pop}/paired_alignment", pop=Populations),
-				alignments2 = expand("samples2/{pop}/paired_alignment", pop=Populations2)
+				alignments2 = expand("samples_2/{pop}/paired_alignment", pop=Populations2)
 # 				kmer_counts = expand("{pop}/single_kmer_count", pop=Populations),
 #				single_end_reads = expand("samples/{pop}/reads.fastq", pop=Populations)
 #				pop_configurations = expand("samples/{pop}/config.ini", pop=Populations)

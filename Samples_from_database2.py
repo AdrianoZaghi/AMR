@@ -3,8 +3,11 @@ import os
 import json
 import csv
 
+###########################################
+#DA RUNNARE NELL'AMBIENTE DI BASE, CHE CONTIENE SEQTK
+
 DATABASE = "Database_campioni2.csv"
-SAMPLES_DIR = "samples2/"
+SAMPLES_DIR = "samples_2/"
 REAL_SAMPLES_LOCATION = "Real_samples_de_Caesar/samples_trim/"
 PROCESSORS = 25
 FRAGMENT_SIZE = 270
@@ -18,33 +21,48 @@ if len(Untracked_samples) > 0:
 	print("Ci sono dei campioni non tracciati!!!")
 	print(Untracked_samples)
 
-print("Ci sarebbero questi campioni non ancora fatti")
+print("Ci sarebbero "+str(len(Samples_to_create))+" campioni non ancora fatti")
 print(Samples_to_create)
 
 def create_samples_from_database(Database, Samples_to_create):
 	for S in Samples_to_create:
 		SEED = Database.loc[S]["Seed"]
 		os.mkdir(SAMPLES_DIR + S)
-		if Database.loc[S]["Real/Simul"] == "Simul":
+		if Database.loc[S]["Real/Simul"] in ["Simul", "De_Caesar_simul"]:
 			genomes_tot = 0
 			with open(SAMPLES_DIR + S + "/input.tsv", mode="w") as Itsv:
 				table = csv.writer(Itsv, delimiter = "\t")
 				table.writerow(["Genome_ID",	"Species_Name",	"Abundance", "N_strains"	,"PATRIC_ID",	"Antibiotic",	"Phenotype",	"Genome_length",	"Novelty_category",	"Genome_file"])
 				if Database.loc[S]["Aureus_S"] > 0:
 					genomes_tot += int(Database.loc[S]["Aureus_S_N_strains"])
-					table.writerow(["Aureus_S",	"Staphylococcus_aureus_ATCC_25923",	Database.loc[S]["Aureus_S"], Database.loc[S]["Aureus_S_N_strains"]	,"1280.99999",	"Oxacillina",	"susceptible",	"2806340",	"known_strain",	"Aureus_S.fasta"])
+					if Database.loc[S]["Real/Simul"] == "Simul":
+						table.writerow(["Aureus_S",	"Staphylococcus_aureus_ATCC_25923",	Database.loc[S]["Aureus_S"], Database.loc[S]["Aureus_S_N_strains"]	,"1280.99999",	"Oxacillina",	"susceptible",	"2806340",	"known_strain",	"Aureus_S.fasta"])
+					elif Database.loc[S]["Real/Simul"] == "De_Caesar_simul":
+						table.writerow(["Aureus_S",	"Staphylococcus_aureus_ATCC_25923",	Database.loc[S]["Aureus_S"], Database.loc[S]["Aureus_S_N_strains"]	,"1280.99999",	"Oxacillina",	"susceptible",	"2806340",	"known_strain",	"De_Caesar_Aureus_S.fasta"])
 				if Database.loc[S]["Aureus_R"] > 0:
 					genomes_tot += int(Database.loc[S]["Aureus_R_N_strains"])
-					table.writerow(["Aureus_R",	"Staphylococcus_aureus_ATCC_BAA-2312",	Database.loc[S]["Aureus_R"],	Database.loc[S]["Aureus_R_N_strains"]	,"1280.9999999",	"Oxacillina",	"resistant",	"2825116",	"known_strain",	"Aureus_R.fasta"])
+					if Database.loc[S]["Real/Simul"] == "Simul":
+						table.writerow(["Aureus_R",	"Staphylococcus_aureus_ATCC_BAA-2312",	Database.loc[S]["Aureus_R"],	Database.loc[S]["Aureus_R_N_strains"]	,"1280.9999999",	"Oxacillina",	"resistant",	"2825116",	"known_strain",	"Aureus_R.fasta"])
+					elif Database.loc[S]["Real/Simul"] == "De_Caesar_simul":
+						table.writerow(["Aureus_R",	"Staphylococcus_aureus_ATCC_BAA-2312",	Database.loc[S]["Aureus_R"],	Database.loc[S]["Aureus_R_N_strains"]	,"1280.9999999",	"Oxacillina",	"resistant",	"2825116",	"known_strain",	"De_Caesar_Aureus_R.fasta"])
 				if Database.loc[S]["Coli"] > 0:
 					genomes_tot += int(Database.loc[S]["Coli_N_strains"])
-					table.writerow(["Coli",	"Escherichia_coli_strain_ATCC_25922",	Database.loc[S]["Coli"],	Database.loc[S]["Coli_N_strains"],	"562.108487",	"Oxacillina",	"resistant",	"5209985",	"known_strain",	"Coli.fasta"])
+					if Database.loc[S]["Real/Simul"] == "Simul":
+						table.writerow(["Coli",	"Escherichia_coli_strain_ATCC_25922",	Database.loc[S]["Coli"],	Database.loc[S]["Coli_N_strains"],	"562.108487",	"Oxacillina",	"resistant",	"5209985",	"known_strain",	"Coli.fasta"])
+					elif Database.loc[S]["Real/Simul"] == "De_Caesar_simul":
+						table.writerow(["Coli",	"Escherichia_coli_strain_ATCC_25922",	Database.loc[S]["Coli"],	Database.loc[S]["Coli_N_strains"],	"562.108487",	"Oxacillina",	"resistant",	"5209985",	"known_strain",	"De_Caesar_Coli.fasta"])	
 				if Database.loc[S]["Pseudomonas"] > 0:
 					genomes_tot += int(Database.loc[S]["Pseudomonas_N_strains"])
-					table.writerow(["Pseudomonas",	"Pseudomonas_aeruginosa_ATCC_27853",	Database.loc[S]["Pseudomonas"],	Database.loc[S]["Pseudomonas_N_strains"],	"287.26013",	"Oxacillina",	"resistant",	"6839777",	"known_strain",	"Pseudomonas.fasta"])
+					if Database.loc[S]["Real/Simul"] == "Simul":
+						table.writerow(["Pseudomonas",	"Pseudomonas_aeruginosa_ATCC_27853",	Database.loc[S]["Pseudomonas"],	Database.loc[S]["Pseudomonas_N_strains"],	"287.26013",	"Oxacillina",	"resistant",	"6839777",	"known_strain",	"Pseudomonas.fasta"])
+					elif Database.loc[S]["Real/Simul"] == "De_Caesar_simul":
+						table.writerow(["Pseudomonas",	"Pseudomonas_aeruginosa_ATCC_27853",	Database.loc[S]["Pseudomonas"],	Database.loc[S]["Pseudomonas_N_strains"],	"287.26013",	"Oxacillina",	"resistant",	"6839777",	"known_strain",	"De_Caesar_Pseudomonas.fasta"])
 				if Database.loc[S]["Arcobacter"] > 0:
 					genomes_tot += int(Database.loc[S]["Arcobacter_N_strains"])
-					table.writerow(["Arcobacter",	"Arcobacter_butzleri_strain_NCTC_12481",	Database.loc[S]["Arcobacter"],	Database.loc[S]["Arcobacter_N_strains"],"28197.59",	"Oxacillina",	"susceptible",	"2347607",	"known_strain",	"Arcobacter.fasta"])
+					if Database.loc[S]["Real/Simul"] == "Simul":
+						table.writerow(["Arcobacter",	"Arcobacter_butzleri_strain_NCTC_12481",	Database.loc[S]["Arcobacter"],	Database.loc[S]["Arcobacter_N_strains"],"28197.59",	"Oxacillina",	"susceptible",	"2347607",	"known_strain",	"Arcobacter.fasta"])
+					elif Database.loc[S]["Real/Simul"] == "De_Caesar_simul":
+						table.writerow(["Arcobacter",	"Arcobacter_butzleri_strain_NCTC_12481",	Database.loc[S]["Arcobacter"],	Database.loc[S]["Arcobacter_N_strains"],"28197.59",	"Oxacillina",	"susceptible",	"2347607",	"known_strain",	"De_Caesar_Arcobacter.fasta"])
 
 			dic = {"simulation_directory": os.getcwd() + "/" + SAMPLES_DIR + S,
 			"seed":str(SEED),

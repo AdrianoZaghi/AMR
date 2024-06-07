@@ -20,7 +20,9 @@ trimmomatic-*
 Example*
 move_to_storage*
 samples2/*
-old*
+M_learning_old.py
 Old*
 SPAdes*
 Spades*
+quast*
+My_scripts/Da_aggiungere.csv

@@ -219,3 +219,27 @@ rule rgi_env_setup:
 		#rgi load --wildcard_annotation wildcard_database_v{wild_card_version}.fasta --wildcard_index wildcard/index-for-model-sequences.txt --card_annotation card_database_v{card_version}.fasta --local
 		cd ..
 		"""
+
+rule Kraken:
+	input:
+		S1 = "Real_samples_de_Caesar/samples_trim/{sample}_R1_001.fastq.gz",
+		S2 = "Real_samples_de_Caesar/samples_trim/{sample}_R2_001.fastq.gz",
+	output:
+		"kraken2/Kraken_results/{sample}"
+	conda: "env.yaml"
+	threads: 20
+	shell:
+		"""
+		./kraken2/kraken2 --db kraken2/My_reference --threads {threads} --paired --output kraken2/Kraken_results/{wildcards.sample} --report kraken2/Kraken_results/{wildcards.sample}_report.txt {input.S1} {input.S2}
+		"""
+
+rule Kraken_report_for_me:
+	input:
+		S="kraken2/Kraken_results/{sample}"
+	output:
+		"kraken2/Kraken_results/{sample}_report.csv"
+	shell:
+		"""
+		python my_scripts/kraken_report.py {input.S} -o kraken2/Kraken_results/{wildcards.sample}_report.csv
+		rm {input.S}
+		"""

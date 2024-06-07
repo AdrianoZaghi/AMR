@@ -7,7 +7,6 @@ def genera_proporzioni(Batteri, lista = ["Aureus_S","Aureus_R","Coli","Pseudomon
     if len([x for x in Batteri if x not in lista]) > 0:
         raise ValueError("Batteri non validi. Devono essere tra:" + str(lista) + ".")
     quanti_te_ne_servono = len(Batteri)
-    non_servono = [x for x in lista if x not in Batteri]
     is_ok = False
     while is_ok == False:
         #numbers = sorted([random.randint(0,1000) for x in range(0, quanti_te_ne_servono-1)])
@@ -23,26 +22,26 @@ def genera_proporzioni(Batteri, lista = ["Aureus_S","Aureus_R","Coli","Pseudomon
                 is_ok = True
     to_return = []
     for i in lista:
-        if i in non_servono:
-            to_return.append(0)
-        else:
+        if i in Batteri:
             to_return.append(intervals.pop(0))
+        else:
+            to_return.append(0)
     return to_return
 
 #Aureus_S,Aureus_R,Coli,Pseudomonas,Arcobacter
 #Arcobacter è quello suscettibile
 
-def genera_df(Quanti_campioni, Pronome, Batteri, Size, N_strains, Seed = 1):
+def genera_df(Quanti_campioni, Pronome, Batteri, Size, N_strains, Lower_Seed = 1):
     data = []
     for i in range(0,Quanti_campioni):
         Nome = Pronome + str(i)
         proporzioni = genera_proporzioni(Batteri)
-        sample = [Nome] + proporzioni + [Size, N_strains, "De_Caesar_simul", "Campione_simulato", Seed]
+        sample = [Nome] + proporzioni + [Size, N_strains, "De_Caesar_simul", "Campione_simulato", Lower_Seed + 1 + i]
         data.append(sample)
     df = pd.DataFrame(data, columns=["Nome","Aureus_S","Aureus_R","Coli","Pseudomonas","Arcobacter","Size","N strains","Real/Simul","Original sample","Seed"])
     return df
 
-def genera_df_2(Quanti_campioni, Pronome, Batteri, Size, Strain_counts, Seed = 1):
+def genera_df_2(Quanti_campioni, Pronome, Batteri, Size, Strain_counts, Lower_Seed = 1):
     data = []
     if "Aureus_S" not in Batteri:
         Strain_counts.insert(0,0)
@@ -57,13 +56,13 @@ def genera_df_2(Quanti_campioni, Pronome, Batteri, Size, Strain_counts, Seed = 1
     for i in range(0,Quanti_campioni):
         Nome = Pronome + str(i)
         proporzioni = genera_proporzioni(Batteri)
-        sample = [Nome] + proporzioni + [Size, "De_Caesar_simul", "Campione_simulato", Seed] + Strain_counts
+        sample = [Nome] + proporzioni + [Size, "De_Caesar_simul", "Campione_simulato", Lower_Seed + 1 + i] + Strain_counts
         print(sample)
         data.append(sample)
     df = pd.DataFrame(data, columns=["Nome","Aureus_S","Aureus_R","Coli","Pseudomonas","Arcobacter","Size","Real/Simul","Original sample","Seed","SeedAureus_S_N_strains","Aureus_R_N_strains","Coli_N_strains","Pseudomonas_N_strains","Arcobacter_N_strains"])
     return df
 
-def genera_df_3(Quanti_campioni, Pronome, Size, Strain_counts, Genome_source : ["Simul", "De_Caesar_simul"], Seed = 1):
+def genera_df_3(Quanti_campioni, Pronome, Size, Strain_counts, Genome_source : ["Simul", "De_Caesar_simul"], Lower_Seed = 1):
     """Generate "Quanti_campioni" samples with name "Pronome" + i, with size "Size" and strain counts "Strain_counts" and seed "Seed" specified in the arguments.
     The presence of a strain is chosen randomly, first selecting how many of them, and then selecting them from our genome pool.
     The number of symulated strains is fixed for each of the five strains, and is specified in the "Strain_counts" list.
@@ -79,7 +78,7 @@ def genera_df_3(Quanti_campioni, Pronome, Size, Strain_counts, Genome_source : [
         pop = genera_proporzioni(quali_batteri)
         Nome = Pronome + str(i)
         provenienza = Genome_source
-        sample = [Nome] + pop + [Size, provenienza, "Campione_simulato", Seed] + Strain_counts
+        sample = [Nome] + pop + [Size, provenienza, "Campione_simulato", Lower_Seed + i + 1] + Strain_counts
         data.append(sample)
     df = pd.DataFrame(data, columns=["Nome"] + possible_bacteria +["Size","Real/Simul","Original sample","Seed","Aureus_S_N_strains","Aureus_R_N_strains","Coli_N_strains","Pseudomonas_N_strains","Arcobacter_N_strains"])
     df.set_index("Nome", inplace = True)
@@ -99,7 +98,8 @@ if False:
     plt.tight_layout()
     plt.show()
 
-DD = genera_df_3(600, "Rampage_", 0.01, [1,1,1,1,1], Genome_source="Real", Seed=1)
+seed = int(input("Please enter the lower value fot the seed: "))
+DD = genera_df_3(Quanti_campioni=200, Pronome="28_03_", Size=0.1, Strain_counts=[1,1,1,1,1], Genome_source="De_Caesar_simul", Lower_Seed=seed)
 
 #DD = genera_df_2(1000, "De_caesar_simulated_test_1", ["Aureus_S", "Aureus_R", "Coli", "Pseudomonas", "Arcobacter"], Size = 0.01, Strain_counts = [1,1,1,1,1], Seed=1)
 #DD.

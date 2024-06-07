@@ -4,13 +4,15 @@ import matplotlib.backends.backend_pdf
 pdf = matplotlib.backends.backend_pdf.PdfPages("output.pdf")
 from sklearn.linear_model import ElasticNet
 from operator import itemgetter
+import random
 import json
 import seaborn as sns
 import pandas as pd
 import numpy as np
+import os
 average_read_length = 270
 
-def plot_results(target, prediction, filename = None, R2 = None):
+def plot_results(target, prediction, filename = None, R2 = None, x_up_lim = None, x_low_lim = None, y_up_lim = None, y_low_lim = None):
 	"""Plots the target vs the prediction of a model
 	The is a scatter plot: in an optimal case, the points should be on the line y=x
 	Args:
@@ -24,6 +26,10 @@ def plot_results(target, prediction, filename = None, R2 = None):
 	x=[max([min(target)-0.01, min(prediction)-0.01]), min([max(target)+0.01,max(prediction)+0.01])]
 	y=x
 	plt.plot(x, y, 'k:', lw=2)
+	if x_up_lim is not None or x_low_lim is not None:
+		plt.xlim(x_low_lim, x_up_lim)
+	if y_up_lim is not None or y_low_lim is not None:
+		plt.ylim(x_low_lim, x_up_lim)
 	plt.xlabel("Target")
 	plt.ylabel("Predictions")
 	title = "Target vs Prediction"
@@ -49,13 +55,15 @@ def plot_controls(dataf, filename, n_columns=5):
 	pdf.close()
 	return(control_biggest)
 
-def read_bwt_2_aro(popolazioni):
+def read_bwt_2_aro(popolazioni, reduce_depth = 1):
 	"""Reads the abundances of the ARO entries detected by the rgi bwt alignment
 	The ARO entries are identifiers of the resistomes present in the rgi
 	This function returns a database with the estimated abundances of each resistome for each sample
 	Args:
 		popolazioni (list): the list of the populations paths
 	"""
+	if reduce_depth <= 0 or reduce_depth > 1:
+		raise ValueError("reduce_depth must be a number between 0 and 1, bigger than 0")
 	resistomes = {}
 	for P in popolazioni:
 		with open(P+"/bwt_out/bwt.allele_mapping_data.json", mode = "r") as f:
@@ -63,10 +71,15 @@ def read_bwt_2_aro(popolazioni):
 			dati = [di for di in dati_ if isinstance(di, dict)]
 			R={}
 			for aro in dati:
-				if str(aro["aro_accession"]) in R.keys():
-					R[str(aro["aro_accession"])] += int(aro["reads"]["all"]) * average_read_length / int(aro["reference"]["sequence_length"])
+				aro_accession = str(aro["aro_accession"])
+				aro_count = int(aro["reads"]["all"])
+				if reduce_depth < 1:
+					aro_count = np.random.binomial(n=aro_count, p=reduce_depth)
+				if aro_accession in R.keys():
+					R[aro_accession] += aro_count * average_read_length / int(aro["reference"]["sequence_length"])
 				else:
-					R[str(aro["aro_accession"])] = int(aro["reads"]["all"]) * average_read_length / int(aro["reference"]["sequence_length"])
+					R[aro_accession] = aro_count * average_read_length / int(aro["reference"]["sequence_length"])
+				
 			resistomes[P] = R
 	Return = pd.DataFrame.from_dict(resistomes, orient="index").fillna(0)
 	Return = Return.reindex(popolazioni)
@@ -146,6 +159,49 @@ def read_metadata(popolazioni):
 		else: Aureus_r_abundance[pop_name] = 0
 	return {"Metadata":metadata, "Abundances_r":r_abundances, "Aureus_r": Aureus_r_abundance}
 
+def read_abundances_from_tax_ettore(popolazioni,  correspondance_SubSamp:[None, str]= None, correspondance_genomes = "Taxonomy_samples_de_cesare/correspondance_genomes.json", verbose=False):
+	"""Reads the abundances of the genomes detected by the tax_ettore
+	This function returns a database with the estimated abundances of each genome for each sample
+	Args:
+		popolazioni (list): the list of the populations paths
+		correspondance_SubSamp (str) = Json file containing correspondance between original De Cesare samples and it's subsamples
+			if None, the samples which contain the name of the original De Cesare sample will be considered to be subsamle of them
+		correspondance_genomes (str) = "Taxonomy_samples_de_cesare/correspondance_genomes.json": the path of the file containing the correspondance between the genomes names and the Machine learining labels
+	"""
+	df_return = {}
+	with open(correspondance_genomes, mode = "r") as f:
+		info = json.load(f)
+		correspondance = info["Contig_to_genome"]
+		G_len = info["Genome_length"]
+	if correspondance_SubSamp is not None:
+		print("Questa versione è ancora da implementare, per ora non mi serve")
+		with open(correspondance_SubSamp, mode = "r") as f:
+			correspondance_SubSamp = json.load(f)
+	else:
+		ettore_tax = os.listdir("Taxonomy_samples_de_cesare")
+		ettore_tax = [et for et in ettore_tax if "txt" in et]
+		correspondance_SubSamp = {}
+		for P in popolazioni:
+			abundances = None
+			for et in ettore_tax:
+				if et.split("_table")[0] in P:
+					#print("Correspondance between "+P.split("/")[1]+" and "+et)
+					correspondance_SubSamp[P.split("/")[1]] = et
+					abundances = pd.read_csv("Taxonomy_samples_de_cesare/"+et, sep="\t", index_col=0)
+					break
+			if abundances is None:
+				if verbose: print("No correspondance for "+P)
+			else:
+				bacteria = {k:0 for k in set(correspondance.values())}
+				for index, row in abundances.iterrows():
+					bacteria[correspondance[index]] += row["mapped_reads"]
+					if verbose: print(bacteria)
+				df_return[P] = bacteria
+	df_return = pd.DataFrame.from_dict(df_return, orient="index")
+	df_return = df_return.div(G_len, axis=1)
+	return df_return.div(df_return.sum(axis=1), axis=0)
+
+
 def regression(Train, Test, Train_target, classifier, parameter_space, Keep_columns_that_appear_just_in_one_set = False):
 	"""Performs a regression on the Train data and predicts the Test data
 	Returns a dictionary with:
@@ -193,6 +249,11 @@ def log_shift(dict, shift = 1):
 def normalize_counts(data):
 	r = data.apply(lambda x: x / x.max())
 
+def logistic(dict, min = 0.001, max = 0.999, scale = 1):
+	d = {k: min if v < min else v for k, v in dict.items()}
+	d = {k: max if v > max else v for k, v in d.items()}
+	return {k : -np.log((1/v)-1)*scale for k, v in d.items()}
+
 def feature_importance(Train_data, fitted_model, filename = None):
 	"""Plots the feature importance of a model and returns a dictionary with the feature importance
 	At the moment, it works only with the ElasticNet model and the ensambles models of sklearn: RandomForest, AdaBoost....
@@ -201,7 +262,7 @@ def feature_importance(Train_data, fitted_model, filename = None):
 		fitted_model (sklearn model): the model used for the regression, IT NEEDS TO HAVE THE .fit() METHOD
 		filename (str) = None: the name of the file where the plot will be saved"""
 	if(isinstance(fitted_model,ElasticNet)):
-		F_imp = fitted_model.coef_
+		F_imp = [abs(i) for i in fitted_model.coef_]
 	else:
 		F_imp = fitted_model.feature_importances_
 	F = Train_data.columns
@@ -214,7 +275,7 @@ def feature_importance(Train_data, fitted_model, filename = None):
 		plt.savefig(filename)
 	return F_imp
 
-def heatmap_abundance(Data, Target = None, F_imp = None, Normalize = False, saturation = -1,filename = None):
+def heatmap_abundance(Data, Target = None, F_imp = None, Normalize = False, saturation = -1,rempove_empthy_col = True, filename = None, figsize = (15, 6)):
 	"""Plots a heatmap of the data
 	If Target is not None, the rows will be sorted by the target values
 	If F_imp is not None, the columns will be sorted by the feature importance
@@ -228,18 +289,24 @@ def heatmap_abundance(Data, Target = None, F_imp = None, Normalize = False, satu
 		saturation (int) = -1: the maximum value of the data
 		filename (str) = None: the name of the file where the plot will be saved
 	"""
+	d = Data
 	if Target is not None:
 		sorted_rows = dict(sorted(Target.items(), key=lambda item: item[1]))
-		d = Data.reindex(sorted_rows)
+		d = d.reindex(sorted_rows)
 	if F_imp is not None:
 		sorted_columns = dict(sorted(F_imp.items(), key=lambda item: item[1]))
 		d = d[sorted_columns]
 	if saturation > 0:
-		Data = Data.where(Data < saturation, saturation)
-	if Normalize:
-		d_norm = d.apply(lambda x: x / x.max())
-		plt.figure(figsize=(15, 6))
-		sns.heatmap(d_norm, cmap='viridis')
-	else:
-		plt.figure(figsize=(15, 6))
-		sns.heatmap(d, cmap='viridis')
+		d = d.where(d < saturation, saturation)
+	if rempove_empthy_col:
+		print("Removing"+str(len(d.columns[(d == 0).all()]))+"empty columns")
+		d = d.loc[:, (d != 0).any(axis=0)]
+		if Normalize:
+			d = d.apply(lambda x: x / x.max())
+	elif Normalize:
+		print("You can't normalize the data without removing the empty columns, please set rempove_empthy_col = True or Normalize = False")
+	plt.figure(figsize=figsize)
+	sns.heatmap(d, cmap='viridis')
+	if not filename == None:
+		plt.savefig(filename)
+	return d

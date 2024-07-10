@@ -14,7 +14,7 @@ keywords:
   - "bioinformatics"
   - "genomics"
   - "AMR analysis"
-license: "MIT"
+license: ""
 repository-code: "https://github.com/AdrianoZaghi/AMR"
 references:
   - type: "article"

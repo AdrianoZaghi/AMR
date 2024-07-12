@@ -20,21 +20,9 @@ average_read_length = 270
 images_dir = "M_learning_images/"
 campioni = pd.read_csv("Database_campioni2.csv", index_col=0)
 
-#%%
-#Declaring the models and initializing their grid of hyperparameters
-El = ElasticNet(max_iter=100000, tol=0.0005)
-params_El = {"alpha":[0.2, 0.5, 0.75, 0.85,1], "l1_ratio":[0,0.5,1]}
-params_El = {"alpha":[0.2, 0.5, 0.75, 0.85,1, 2], "l1_ratio":[0, 0.3, 0.5, 0.7 ,1]}
-#Con questa non serve levare i campinoi estremi che anzi hanno un'effetto stabilizzante
-#È evidente la presenza di un bias
-
-Forest = RandomForestRegressor(random_state = 0, n_estimators=1000, n_jobs=-1, oob_score=True)
-params_Forest = {"criterion":["squared_error", "absolute_error", "friedman_mse"]}
-#Gli ensamble non lineari, tendono a classificare gli 0, gli uno e qulli intermedi. Performano male su quelli intermedi
-
-Base_estimator_for_adaboost = DecisionTreeRegressor(max_depth=5)
+Base_estimator_for_adaboost = DecisionTreeRegressor(max_depth=10)
 Ada =  AdaBoostRegressor(estimator=Base_estimator_for_adaboost,n_estimators=100, random_state=0)
-params_Ada = {"loss":["exponential"], "learning_rate":[0.1, 0.5, 1]}
+params_Ada = {"loss":["linear", "square", "exponential"], "learning_rate":[0.1, 0.5, 1, 2]}
 #SELECTING THE MODEL TO USE
 
 model = Ada
@@ -44,10 +32,11 @@ subsample_counts = 1
 Eliminate_extreme_samples = False
 WHICH = "Synth_on_Real_assembled_genomes_0.1" #"Synth_on_Real_assembled_genomes_0.1_10_S_strins" #Synth_on_Real_assembled_genomes_0.1
 Add_second_degree_features = False
-Images = False
+Images = True
 
 if(WHICH == "Synth_on_Real_assembled_genomes_0.1"):
 	t = campioni[campioni["Size"] == 0.1]
+	#Train = ["samples_2/" + x for x in t[t["Real/Simul"] == "Simul"].index]
 	Train = ["samples_2/" + x for x in t[t["Real/Simul"] == "De_Caesar_simul"].index]
 	Test = ["samples_2/" + x for x in t[t["Real/Simul"] == "Real"].index]
 	print("Synth_on_Real_assembled_genomes_0.1")
@@ -58,19 +47,19 @@ Test_target = im.read_metadata(Test)["Abundances_r"]
 t_test = t[t["Real/Simul"] == "Real"]
 t_test = t_test[["Aureus_S", "Aureus_R", "Coli", "Pseudomonas", "Arcobacter"]]
 
-bias = {'Aureus_S': 6.37698087,
- 'Aureus_R': 8.46693667,
+bias_De_caesar = {'Aureus_S': 4.96,
+ 'Aureus_R': 4.96,
  'Coli': 1,
- 'Pseudomonas': 1.83036887,
- 'Arcobacter': 1.8665934}
+ 'Pseudomonas': 1,
+ 'Arcobacter': 1}
 
-bias_uncertanty = {'Aureus_S': 0.99561185,
-'Aureus_R': 1.16214196,
-'Coli': 0,
-'Pseudomonas': 0.2528959,
-'Arcobacter': 0.48897503}
+bias_simul ={"Aureus_S": 6.63,#5.03,#5.22
+  "Aureus_R": 6.63,#5.03,#5.22
+  "Coli": 1,
+  "Pseudomonas": 1,
+  "Arcobacter": 1}
 
-t_test = t_test.mul(bias, axis=1)
+t_test = t_test.mul(bias_simul, axis=1)
 #Normalizzo le abbondanze aggiustate e sommo le abbondanze di Aureus_R, Coli e Pseudomonas per ottenere la resistenza
 t_test = t_test.div(t_test.sum(axis=1), axis=0)
 t_test = t_test[["Aureus_R", "Coli", "Pseudomonas"]].sum(axis=1)
@@ -81,7 +70,7 @@ Results = {}
 for sub in depths:
 	print("Depth: "+str(sub)+" ", end = '')
 	R2s_for_a_dept = []
-	for i in range(5):
+	for i in range(0,6):
 		print(".", end = '')
 		Test_data, Train_data = im.read_bwt_2_aro(Test, sub), im.read_bwt_2_aro(Train, sub)
 		missing_in_Test, missing_in_Train = [c for c in Train_data.columns if c not in Test_data.columns], [c for c in Test_data.columns if c not in Train_data.columns]
@@ -103,20 +92,15 @@ for sub in depths:
 	Results["Subsample " + str(sub)] = {"R2" : R2s_for_a_dept, "Best_estimator" : best}
 	if Images:
 		#Plotting results["Best_estimator"]
-		im.plot_results(list(Test_target.values()), list(Test_predictions.values()), "M_learning_images/" + WHICH + "sub_" + str(sub) + ".png", R2 = R2)
+		im.plot_results(list(Test_target.values()), list(Test_predictions.values()), "M_learning_images/Depth_subsample_" + str(sub) + ".png", R2 = R2)
 		#Feature importance
-		F_imp = im.feature_importance(Train_data, best, "M_learning_images/"+WHICH+"_feature_importance.png")
-		plt.clf()
-		Results["Subsample " + str(sub)]["Feature_importance"] = F_imp
-
-R_no_zero = {}
-for k,v in Results.items():
-	Feat_imp_no_zero = {k:v for k,v in v["Feature_importance"].items() if v != 0}
-	R_no_zero[k] = {"R2": v["R2"], "Feature_importance": Feat_imp_no_zero}
-	Quante_featues_non_sono_inutili = [len(x["Feature_importance"]) for x in R_no_zero.values()]
+		#F_imp = im.feature_importance(Train_data, best, "M_learning_images/"+WHICH+"_feature_importance.png")
+		#plt.clf()
+		#Results["Subsample " + str(sub)]["Feature_importance"] = F_imp
 
 R2s = [[float(k.split("Subsample ")[1]), v["R2"]] for k,v in Results.items()]
 R2s = pd.DataFrame(R2s, columns = ["Subsample", "R2"])
+R2s["Subsample"] = R2s["Subsample"]*0.1
 R2s["Average R2"] = R2s["R2"].apply(np.mean)
 R2s["R2 errors"] = R2s["R2"].apply(np.std)
 R2s.to_csv("M_learning_images/"+WHICH+"_R2s_depth_effects.csv")
@@ -124,9 +108,12 @@ plt.errorbar(R2s['Subsample'], R2s['Average R2'], yerr=R2s['R2 errors'], fmt='o'
 plt.xscale('log')
 ax = plt.gca()
 ax.axhline(y=1, color='r', linestyle='--')
+ax.set_ylim(0,1.1)
+ax.set_title("Effect of sample depth")
 # Set the labels of the axes
-plt.xlabel('Subsample')
+plt.xlabel('Subsample size (Gbp)')
 plt.ylabel('R2')
 
 # Show the plot
-plt.show()
+#plt.show()
+plt.savefig("M_learning_images/_R2s_depth_effects.png")

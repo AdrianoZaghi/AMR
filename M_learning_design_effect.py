@@ -20,21 +20,20 @@ average_read_length = 270
 images_dir = "M_learning_images/"
 campioni = pd.read_csv("Database_campioni2.csv", index_col=0)
 
-#%%
 Base_estimator_for_adaboost = DecisionTreeRegressor(max_depth=10)
 Ada =  AdaBoostRegressor(estimator=Base_estimator_for_adaboost,n_estimators=500)
-params_Ada = {"loss":["linear", "square", "exponential"], "learning_rate":[0.1]}
-#SELECTING THE MODEL TO USE
+params_Ada = {"loss":["linear", "square", "exponential"], "learning_rate":[0.1, 0.5, 1, 2]}#SELECTING THE MODEL TO USE
 
 model = Ada
 params = params_Ada
 subsample_counts = 1
-USE_BIAS = True
+USE_BIAS = 2
 WHICH = "_"
 
 #Deciding which samples to peack from the database and defining the train and test sets
 t = campioni[campioni["Size"] == 0.1]
 #Selecting train samples
+#t_train = t[t["Real/Simul"] == "Simul"]
 t_train = t[t["Real/Simul"] == "De_Caesar_simul"]
 Train = ["samples_2/" + x for x in t_train.index]
 Train_data = im.read_bwt_2_aro(Train, subsample_counts)
@@ -46,22 +45,17 @@ t_test = t_test[["Aureus_S", "Aureus_R", "Coli", "Pseudomonas", "Arcobacter"]]
 select_target_complexity = t_test != 0
 select_target_complexity = select_target_complexity.astype(int)
 
-#bias = {'Aureus_S': 6.37698087,
-# 'Aureus_R': 8.46693667,
-# 'Coli': 1,
-# 'Pseudomonas': 1.83036887,
-# 'Arcobacter': 1.8665934}
-bias = {'Aureus_S': 4.93,
+bias_simul = {'Aureus_S':  6.63,#5.03,
+ 'Aureus_R':  6.63,#5.03,
+ 'Coli': 1,
+ 'Pseudomonas': 1,
+ 'Arcobacter': 1}
+
+bias_De_caesar = {'Aureus_S': 4.93,
 	'Aureus_R': 4.93,
  	'Coli': 1,
  	'Pseudomonas': 1,
  	'Arcobacter': 1}
-
-bias_uncertanty = {'Aureus_S': 0.99561185,
-'Aureus_R': 1.16214196,
-'Coli': 0,
-'Pseudomonas': 0.2528959,
-'Arcobacter': 0.48897503}
 
 Results = {}
 for i in range(2,6):
@@ -70,9 +64,7 @@ for i in range(2,6):
 	Test_data = im.read_bwt_2_aro(Test, subsample_counts)
 	#Sto prendendo il target dai metadata
 	Test_target_nominale = im.read_metadata(Test)["Abundances_r"]
-	if USE_BIAS:
-		#Moltiplico tutte le abbondanze per il loro bias
-		ttt = ttt.mul(bias, axis=1)
+	ttt = ttt.mul(bias_simul, axis=1)
 	#Normalizzo le abbondanze aggiustate e sommo le abbondanze di Aureus_R, Coli e Pseudomonas per ottenere la resistenza
 	ttt = ttt.div(ttt.sum(axis=1), axis=0)[["Aureus_R", "Coli", "Pseudomonas"]].sum(axis=1)
 	Test_target_aggiustato = dict(zip(Test, ttt))
@@ -86,7 +78,7 @@ for i in range(2,6):
 	print("Sto usando "+str(len(Train_data_clean.columns))+" colonne nel fit")
 	R2s_for_species_number = []
 	R2s_for_species_number_adj = []
-	for iii in range(0,1):
+	for iii in range(0,6):
 		grid = GridSearchCV(model, params, n_jobs=-1, refit=True, cv=10, verbose=0, scoring="r2", )
 		grid.fit(Train_data_clean, list(Train_target.values()), )
 		train_scores = {k:v for k,v in grid.cv_results_.items() if "split" in k}
@@ -98,7 +90,7 @@ for i in range(2,6):
 		#F_imp = im.feature_importance(Train_data, best, "M_learning_images/"+WHICH+"_feature_importance.png")
 		#plt.clf()
 		R2_adj = r2_score(list(Test_target_aggiustato.values()), list(Test_predictions.values())) #il R2 ridotto non mi sembra adatto, non ho un numero preciso di parametri che fitto
-		im.plot_results(list(Test_target_aggiustato.values()), list(Test_predictions.values()), "M_learning_images/" + WHICH + ".png", R2 = R2_adj)
+		im.plot_results(list(Test_target_aggiustato.values()), list(Test_predictions.values()), "M_learning_images/Complexity_" + str(i) + ".png", R2 = R2_adj)
 		#F_imp = im.feature_importance(Train_data, best, "M_learning_images/"+WHICH+"_feature_importance.png")
 		plt.clf()
 		R2s_for_species_number.append(R2)
@@ -106,7 +98,7 @@ for i in range(2,6):
 	Results["Number of species: " + str(i)] = {"R2" : R2s_for_species_number, "R2_adj" : R2s_for_species_number_adj}
 	#Results["Number of species: " + str(i)]["Feature_importance"] = F_imp
 	#Results["Number of species: " + str(i)]["Best_estimator"] = best
-#%%
+
 R2s = [[int(k.split("Number of species: ")[1]), v["R2"]] for k,v in Results.items()]
 R2s = pd.DataFrame(R2s, columns = ["Number of species", "R2"])
 R2s["Average R2"] = R2s["R2"].apply(np.mean)
@@ -116,7 +108,7 @@ R2s_adj = [[int(k.split("Number of species: ")[1]), v["R2_adj"]] for k,v in Resu
 R2s_adj = pd.DataFrame(R2s_adj, columns = ["Number of species", "R2_adj"])
 R2s_adj["Average R2"] = R2s_adj["R2_adj"].apply(np.mean)
 R2s_adj["R2 errors"] = R2s_adj["R2_adj"].apply(np.std)
-R2s_adj.to_csv("M_learning_images/"+WHICH+"_R2s_adj_depth_effects.csv")
+R2s_adj.to_csv("M_learning_images/"+WHICH+"_R2s_design_effects.csv")
 
 #USIAMO R2_adj PER FAVORE
 fig, ax = plt.subplots()
@@ -125,6 +117,8 @@ ax.set_xlabel('Sample complexity')
 ax.set_xticks([2,3,4,5])
 ax.axhline(y=1, color='r', linestyle='--')
 ax.set_ylabel('R2')
+ax.set_title("Effect of sample complexity")
+ax.set_ylim(0.5,1.1)
 
 # Show the plot
-plt.show()
+plt.savefig("M_learning_images/Complexity_effect_synth.png")

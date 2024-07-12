@@ -99,7 +99,7 @@ if False:
     plt.show()
 
 seed = int(input("Please enter the lower value fot the seed: "))
-DD = genera_df_3(Quanti_campioni=200, Pronome="28_03_", Size=0.1, Strain_counts=[1,1,1,1,1], Genome_source="De_Caesar_simul", Lower_Seed=seed)
+DD = genera_df_3(Quanti_campioni=800, Pronome="25_06_", Size=0.1, Strain_counts=[1,1,1,1,1], Genome_source="Simul", Lower_Seed=seed)
 
 #DD = genera_df_2(1000, "De_caesar_simulated_test_1", ["Aureus_S", "Aureus_R", "Coli", "Pseudomonas", "Arcobacter"], Size = 0.01, Strain_counts = [1,1,1,1,1], Seed=1)
 #DD.

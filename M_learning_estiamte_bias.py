@@ -21,9 +21,9 @@ images_dir = "M_learning_images/"
 campioni = pd.read_csv("Database_campioni2.csv", index_col=0)
 
 #%%
-Base_estimator_for_adaboost = DecisionTreeRegressor(max_depth=5)
+Base_estimator_for_adaboost = DecisionTreeRegressor(max_depth=10)
 Ada =  AdaBoostRegressor(base_estimator=Base_estimator_for_adaboost,n_estimators=100, random_state=0)
-params_Ada = {"loss":["exponential"], "learning_rate":[0.1, 0.5, 1]}
+params_Ada = {"loss":["linear", "square", "exponential"], "learning_rate":[0.1, 0.5, 1, 2]}
 #SELECTING THE MODEL TO USE
 model = Ada
 params = params_Ada
@@ -44,7 +44,9 @@ print(WHICH)
 if (WHICH == "Synth_on_Real_assembled_genomes_0.1"):
 	t = campioni[campioni["Size"] == 0.1]
 	#Selecting train and test samples: data and target
-	Train = ["samples_2/" + x for x in t[t["Real/Simul"] == "De_Caesar_simul"].index]
+	#Train = ["samples_2/" + x for x in t[t["Real/Simul"] == "De_Caesar_simul"].index]
+	Train = ["samples_2/" + x for x in t[t["Real/Simul"] == "Simul"].index]
+	Train = Train + ["samples_2/" + x for x in t[t["Real/Simul"] == "De_Caesar_simul"].index]
 	Test = ["samples_2/" + x for x in t[t["Real/Simul"] == "Real"].index]
 	Train_data = im.read_bwt_2_aro(Train, subsample_counts)
 	Train_target = im.read_metadata(Train)["Abundances_r"]
@@ -105,9 +107,7 @@ def Gram_positiv_or_negativ_adjustement(Nominal_abundances, x):
 X =  [nominal["Aureus_S"], nominal[ "Aureus_R"], nominal["Coli"], nominal["Pseudomonas"], nominal["Arcobacter"]]
 Resistance_ML = [Test_predictions[k] for k in Test_target.keys()]
 fit = curve_fit(Gram_positiv_or_negativ_adjustement, X, Resistance_ML, p0=[1])
+Adjustment = fit[0][0]
 cov_matrix = fit[1]
 covv = np.sqrt(cov_matrix.diagonal())
 COR_matrix = cov_matrix/covv.reshape(-1,1) * covv.reshape(1,-1)
-#bias 4.926, 4.926, 1, 1, 1
-#std_dev = 0.399
-#Variance = 0.159

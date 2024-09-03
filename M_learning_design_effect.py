@@ -14,6 +14,7 @@ from sklearn.model_selection import train_test_split
 import seaborn as sns
 import random
 
+print("Si parteeeee")
 #Lunghezza media delle reads simulate e reali, comunque un fattore di normalizzazione che dovrebbe valere per entrambi
 #potrebbe essere diverso tra simulate e reali
 average_read_length = 270
@@ -33,20 +34,23 @@ WHICH = "_"
 #Deciding which samples to peack from the database and defining the train and test sets
 t = campioni[campioni["Size"] == 0.1]
 #Selecting train samples
-#t_train = t[t["Real/Simul"] == "Simul"]
-t_train = t[t["Real/Simul"] == "De_Caesar_simul"]
+t_train = t[t["Real/Simul"] == "Simul"]
+#t_train = t[t["Real/Simul"] == "De_Caesar_simul"]
 Train = ["samples_2/" + x for x in t_train.index]
 Train_data = im.read_bwt_2_aro(Train, subsample_counts)
+print("Ho letto le features")
 Train_target = im.read_metadata(Train)["Abundances_r"]
+print("Ho letto tuttooooooo")
 
 #Preparing the test samples for selection
 t_test = t[t["Real/Simul"] == "Real"]
+t_test = t_test.drop(["1_Big_DCWGS6_S31_L001", "1_Big_DCWGS7_S37_L001", "2_Big_DCWGS6_S31_L001", "2_Big_DCWGS7_S37_L001"])
 t_test = t_test[["Aureus_S", "Aureus_R", "Coli", "Pseudomonas", "Arcobacter"]]
 select_target_complexity = t_test != 0
 select_target_complexity = select_target_complexity.astype(int)
 
-bias_simul = {'Aureus_S':  6.63,#5.03,
- 'Aureus_R':  6.63,#5.03,
+bias_simul = {'Aureus_S':  6.63,#5.03,#5.22
+ 'Aureus_R':  6.63,#5.03,#5.22
  'Coli': 1,
  'Pseudomonas': 1,
  'Arcobacter': 1}
@@ -57,9 +61,18 @@ bias_De_caesar = {'Aureus_S': 4.93,
  	'Pseudomonas': 1,
  	'Arcobacter': 1}
 
+print("Entriamo nel looooop")
 Results = {}
 for i in range(2,6):
+	print("Sto facendo il fit per "+str(i)+" specie")
 	ttt = t_test[select_target_complexity.sum(axis=1) == i]
+	if True:#adding colors
+		ttc = select_target_complexity[select_target_complexity.sum(axis=1) == i]
+		ttc["combination"] = ttc.apply(lambda row: '_'.join(row.astype(str)), axis=1)
+		unique_combinations = ttc['combination'].unique()
+		colors = plt.cm.rainbow(np.linspace(0, 1, len(unique_combinations)))
+		color_map = dict(zip(unique_combinations, colors))
+		colors_mapped = ttc['combination'].map(color_map)
 	Test = ["samples_2/" + x for x in ttt.index]
 	Test_data = im.read_bwt_2_aro(Test, subsample_counts)
 	#Sto prendendo il target dai metadata
@@ -78,22 +91,22 @@ for i in range(2,6):
 	print("Sto usando "+str(len(Train_data_clean.columns))+" colonne nel fit")
 	R2s_for_species_number = []
 	R2s_for_species_number_adj = []
-	for iii in range(0,6):
+	for iii in range(0,1):
 		grid = GridSearchCV(model, params, n_jobs=-1, refit=True, cv=10, verbose=0, scoring="r2", )
 		grid.fit(Train_data_clean, list(Train_target.values()), )
 		train_scores = {k:v for k,v in grid.cv_results_.items() if "split" in k}
 		best = grid.best_estimator_
 		Test_predictions = grid.predict(Test_data_clean)
 		Test_predictions = dict(zip(Test_data_clean.index, Test_predictions))
-		R2 = r2_score(list(Test_target_nominale.values()), list(Test_predictions.values())) #il R2 ridotto non mi sembra adatto, non ho un numero preciso di parametri che fitto
+		#R2 = r2_score(list(Test_target_nominale.values()), list(Test_predictions.values())) #il R2 ridotto non mi sembra adatto, non ho un numero preciso di parametri che fitto
 		#im.plot_results(list(Test_target_nominale.values()), list(Test_predictions.values()), "M_learning_images/" + WHICH + ".png", R2 = R2)
 		#F_imp = im.feature_importance(Train_data, best, "M_learning_images/"+WHICH+"_feature_importance.png")
 		#plt.clf()
 		R2_adj = r2_score(list(Test_target_aggiustato.values()), list(Test_predictions.values())) #il R2 ridotto non mi sembra adatto, non ho un numero preciso di parametri che fitto
-		im.plot_results(list(Test_target_aggiustato.values()), list(Test_predictions.values()), "M_learning_images/Complexity_" + str(i) + ".png", R2 = R2_adj)
+		im.plot_results_2(list(Test_target_aggiustato.values()), list(Test_predictions.values()), colors=colors_mapped, filename = "M_learning_images/Complexity_" + str(i) + ".png", R2 = R2_adj, y_low_lim=0, y_up_lim=1, x_low_lim=0, x_up_lim=1)
 		#F_imp = im.feature_importance(Train_data, best, "M_learning_images/"+WHICH+"_feature_importance.png")
 		plt.clf()
-		R2s_for_species_number.append(R2)
+		#R2s_for_species_number.append(R2)
 		R2s_for_species_number_adj.append(R2_adj)
 	Results["Number of species: " + str(i)] = {"R2" : R2s_for_species_number, "R2_adj" : R2s_for_species_number_adj}
 	#Results["Number of species: " + str(i)]["Feature_importance"] = F_imp

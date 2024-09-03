@@ -36,8 +36,8 @@ Images = True
 
 if(WHICH == "Synth_on_Real_assembled_genomes_0.1"):
 	t = campioni[campioni["Size"] == 0.1]
-	#Train = ["samples_2/" + x for x in t[t["Real/Simul"] == "Simul"].index]
-	Train = ["samples_2/" + x for x in t[t["Real/Simul"] == "De_Caesar_simul"].index]
+	Train = ["samples_2/" + x for x in t[t["Real/Simul"] == "Simul"].index]
+	#Train = ["samples_2/" + x for x in t[t["Real/Simul"] == "De_Caesar_simul"].index]
 	Test = ["samples_2/" + x for x in t[t["Real/Simul"] == "Real"].index]
 	print("Synth_on_Real_assembled_genomes_0.1")
 
@@ -103,7 +103,7 @@ R2s = pd.DataFrame(R2s, columns = ["Subsample", "R2"])
 R2s["Subsample"] = R2s["Subsample"]*0.1
 R2s["Average R2"] = R2s["R2"].apply(np.mean)
 R2s["R2 errors"] = R2s["R2"].apply(np.std)
-R2s.to_csv("M_learning_images/"+WHICH+"_R2s_depth_effects.csv")
+R2s.to_csv("M_learning_images/R2s_depth_effects_patric.csv")
 plt.errorbar(R2s['Subsample'], R2s['Average R2'], yerr=R2s['R2 errors'], fmt='o')
 plt.xscale('log')
 ax = plt.gca()
@@ -116,4 +116,4 @@ plt.ylabel('R2')
 
 # Show the plot
 #plt.show()
-plt.savefig("M_learning_images/_R2s_depth_effects.png")
+plt.savefig("M_learning_images/R2s_depth_effects_patric.png")

@@ -1,5 +1,6 @@
 from sklearn.model_selection import GridSearchCV
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 import matplotlib.backends.backend_pdf
 pdf = matplotlib.backends.backend_pdf.PdfPages("output.pdf")
 from sklearn.linear_model import ElasticNet
@@ -10,6 +11,8 @@ import seaborn as sns
 import pandas as pd
 import numpy as np
 import os
+from collections import Counter
+
 average_read_length = 270
 
 def plot_results(target, prediction, filename = None, R2 = None, x_up_lim = None, x_low_lim = None, y_up_lim = None, y_low_lim = None):
@@ -18,9 +21,9 @@ def plot_results(target, prediction, filename = None, R2 = None, x_up_lim = None
 	Args:
 		target (list): the target values
 		prediction (list): the predicted values
-		filename (str): the name of the file where the plot will be saved
-		R2 (float): the R2 score of the model
-	
+		filename (str): the name of the file where the plot will be saved, if None, the plot will be shown
+		R2 (float): the R2 score of the model, it will be shown in the title of the plot
+		x_up_lim, x_low_lim, y_up_lim, x_low_lim (float): the limits of the plot
 	"""
 	plt.plot(target, prediction, 'ro')
 	x=[max([min(target)-0.01, min(prediction)-0.01]), min([max(target)+0.01,max(prediction)+0.01])]
@@ -36,6 +39,43 @@ def plot_results(target, prediction, filename = None, R2 = None, x_up_lim = None
 	if R2 is not None:
 		title += ": R2 = " + str(round(R2,4))
 	plt.title(title)
+	if not filename == None:
+		plt.savefig(filename)
+
+def plot_results_2(target, prediction, colors = None, legend = None, filename = None, R2 = None, x_up_lim = None, x_low_lim = None, y_up_lim = None, y_low_lim = None):
+	"""Plots the target vs the prediction of a model
+	The is a scatter plot: in an optimal case, the points should be on the line y=x
+	Args:
+		target (list): the target values
+		prediction (list): the predicted values
+		colors (list) = None: the colors of the points, if not specified, the points will be red
+		filename (str): the name of the file where the plot will be saved, if None, the plot will be shown
+		R2 (float): the R2 score of the model, it will be shown in the title of the plot
+		x_up_lim, x_low_lim, y_up_lim, x_low_lim (float): the limits of the plot, if one is specified, all must be specified
+	"""
+	if colors is None:
+		colors = ["red" for i in range(len(target))]
+	fig, ax = plt.subplots()
+	ax.scatter(target, prediction, c=colors)
+	if any([x_up_lim, x_low_lim, y_up_lim, y_low_lim]) is not None:
+		assert all([x_up_lim, x_low_lim, y_up_lim, y_low_lim]) is not None, "If you specify the limits, you must specify all of them"
+		assert all(target) >= x_low_lim and all(target) <= x_up_lim and all(prediction) >= y_low_lim and all(prediction) <= y_up_lim, "Some points are out of the limits"
+		ax.set_xlim(x_low_lim, x_up_lim)
+		ax.set_ylim(y_low_lim, y_up_lim)
+		low, up = max([x_low_lim, y_low_lim]), min([x_up_lim, y_up_lim])
+		ax.plot([low, up], [low, up], 'k:', lw=2)
+	else:
+		low, up = max([min(target), min(prediction)])+0.01, min([max(target), max(prediction)])-0.01
+		ax.plot([low, up], [low, up], 'k:', lw=2)
+	ax.set_xlabel("Target")
+	ax.set_ylabel("Predictions")
+	title = "Target vs Prediction"
+	if R2 is not None:
+		title += ": R2 = " + str(round(R2,4))
+	ax.set_title(title)
+	if legend is not None:
+		legend_elements = [Line2D([0], [0], marker='o', color='w', label=label, markerfacecolor=color, markersize=10) for label, color in legend.items()]
+		ax.legend(handles=legend_elements, title="Legend")
 	if not filename == None:
 		plt.savefig(filename)
 
@@ -55,7 +95,34 @@ def plot_controls(dataf, filename, n_columns=5):
 	pdf.close()
 	return(control_biggest)
 
-def read_bwt_2_aro(popolazioni, reduce_depth = 1):
+def read_bwt_2_aro_MAPQ(popolazione, just_completely_mapped=True, cumulative = True):
+	"""Reads the abundances of the ARO entries detected by the rgi bwt alignment
+	Plot abundance of those entries all together, devided by their mapping quality
+	Args:
+		popolazione (str): the path of the population
+		just_completely_mapped (bool) = True: if True, only the completely mapped reads will be considered
+	"""
+	R = []
+	with open(popolazione+"/bwt_out/bwt.allele_mapping_data.json", mode = "r") as f:
+		dati_ = json.load(f)
+		dati = [di for di in dati_ if isinstance(di, dict)]
+		for aro in dati:
+			mapq_average = float(aro["mapq_average"])
+			if just_completely_mapped:
+				aro_count = int(aro["reads"]["mapped"])
+			else:		
+				aro_count = int(aro["reads"]["all"])
+			R.append({"Mapped_reads":aro_count, "Mapq_average":mapq_average})
+	Return = pd.DataFrame(R)
+	Return = Return.sort_values(by="Mapq_average")
+	if cumulative:
+		Return["Cumulative"] = Return["Mapped_reads"].cumsum()
+		Return.plot(x="Mapq_average", y="Cumulative")
+	else:
+		Return.plot(x="Mapq_average", y="Mapped_reads")
+	return Return
+
+def read_bwt_2_aro(popolazioni, reduce_depth = 1, mapq_average_min = -1, just_completely_mapped=True, av_read_length = 270):
 	"""Reads the abundances of the ARO entries detected by the rgi bwt alignment
 	The ARO entries are identifiers of the resistomes present in the rgi
 	This function returns a database with the estimated abundances of each resistome for each sample
@@ -72,18 +139,73 @@ def read_bwt_2_aro(popolazioni, reduce_depth = 1):
 			R={}
 			for aro in dati:
 				aro_accession = str(aro["aro_accession"])
-				aro_count = int(aro["reads"]["all"])
-				if reduce_depth < 1:
-					aro_count = np.random.binomial(n=aro_count, p=reduce_depth)
-				if aro_accession in R.keys():
-					R[aro_accession] += aro_count * average_read_length / int(aro["reference"]["sequence_length"])
-				else:
-					R[aro_accession] = aro_count * average_read_length / int(aro["reference"]["sequence_length"])
-				
+				mapq_average = float(aro["mapq_average"])
+				if mapq_average > mapq_average_min:
+					if just_completely_mapped:
+						aro_count = int(aro["reads"]["mapped"])
+					else:		
+						aro_count = int(aro["reads"]["all"])
+					if reduce_depth < 1:
+						aro_count = np.random.binomial(n=aro_count, p=reduce_depth)
+					if aro_accession in R.keys():
+						R[aro_accession] += aro_count * av_read_length / int(aro["reference"]["sequence_length"])
+					else:
+						R[aro_accession] = aro_count * av_read_length / int(aro["reference"]["sequence_length"])
 			resistomes[P] = R
 	Return = pd.DataFrame.from_dict(resistomes, orient="index").fillna(0)
 	Return = Return.reindex(popolazioni)
 	return Return
+
+def read_bwt_2_aro_ossessive(popolazioni, reduce_depth = 1, mapq_min = -1, av_read_length = 270):
+	"""Reads the abundances of the ARO entries detected by the rgi bwt alignment
+	The ARO entries are identifiers of the resistomes present in the rgi
+	This function returns a database with the estimated abundances of each resistome for each sample
+	Args:
+		popolazioni (list): the list of the populations paths
+	"""
+	if reduce_depth <= 0 or reduce_depth > 1:
+		raise ValueError("reduce_depth must be a number between 0 and 1, bigger than 0")
+	resistomes = {}
+	for P in popolazioni:
+		with open(P+"/bwt_out/bwt.allele_mapping_data.json", mode = "r") as f:
+			dati_ = json.load(f)
+			dati = [di for di in dati_ if isinstance(di, dict)]
+			R={}
+			for aro in dati:
+				aro_accession = str(aro["aro_accession"])
+				R[aro_accession] = 0
+				for hit in aro["alignments"]:
+					if int(hit["mapq"]) > mapq_min:
+						R[aro_accession] += 1
+				R[aro_accession] = R[aro_accession] * av_read_length / int(aro["reference"]["sequence_length"])
+			resistomes[P] = R
+	Return = pd.DataFrame.from_dict(resistomes, orient="index").fillna(0)
+	Return = Return.reindex(popolazioni)
+	return Return
+
+def read_bwt_2_aro_ossessive_MAPQ(popolazione, cumulative = True):
+	"""Reads the abundances of the ARO entries detected by the rgi bwt alignment
+	Plot abundance of those entries all together, devided by their mapping quality
+	Args:
+		popolazione (str): the path of the population
+	"""
+	R = []
+	with open(popolazione+"/bwt_out/bwt.allele_mapping_data.json", mode = "r") as f:
+		dati_ = json.load(f)
+		dati = [di for di in dati_ if isinstance(di, dict)]
+		for aro in dati:
+			for hit in aro["alignments"]:
+				R.append(hit["mapq"])
+	item_counts = Counter(R)
+	labels, counts = zip(*item_counts.items())
+	R = pd.DataFrame({"mapq":[int(x) for x in labels],"counts":counts})
+	R.sort_values(by="mapq", inplace=True)
+	if cumulative:
+		R["Cumulative"] = R["counts"].cumsum()
+		R.plot(x="mapq", y="Cumulative")
+	else:
+		R.plot(x="mapq", y="counts")
+	return R
 
 def read_bwt_2_various(popolazioni):
 	"""This function returns dataframeS containing features associated to the resistomes
@@ -133,6 +255,26 @@ def read_bwt_2_various(popolazioni):
 	return({"Pathogens":pd.DataFrame.from_dict(Path, orient="index").fillna(0),\
 		"Antibiotics": pd.DataFrame.from_dict(Anti, orient="index").fillna(0),\
 		"Drugs_class": pd.DataFrame.from_dict(Drug, orient="index").fillna(0)})
+
+def read_metadata_multispecie(popolazioni):
+	metadata = {}
+	for P in popolazioni:
+		M_pop = pd.read_csv(P+"/input.tsv", sep="\t")
+		M_pop = M_pop[["Abundance", "Phenotype"]]
+		tot = sum(M_pop["Abundance"])
+		Pathogen_abundance = M_pop.copy()
+		Pathogen_abundance["Phenotype"].replace(["Non_patogeno", "resistant", "susceptible"], [0,1,1], inplace=True)
+		Pathogen_abundance = Pathogen_abundance.prod(axis=1).sum(axis=0)/tot
+		metadata[P] = {"Pathogen_abundance":Pathogen_abundance}
+		Resistant_abundance = M_pop.copy()
+		Resistant_abundance["Phenotype"].replace(["Non_patogeno", "resistant", "susceptible"], [0,1,0], inplace=True)
+		Resistant_abundance = Resistant_abundance.prod(axis=1).sum(axis=0)/tot
+		metadata[P]["Resistant_abundance"] = Resistant_abundance
+		if Pathogen_abundance == 0:
+			metadata[P]["Resistant_in_pathogens"] = 0
+		else:
+			metadata[P]["Resistant_in_pathogens"] = Resistant_abundance / Pathogen_abundance
+	return metadata
 
 def read_metadata(popolazioni):
 	"""Reads the metadata of the populations

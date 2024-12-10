@@ -1,8 +1,8 @@
 import json
 import sys
 import pandas as pd
-from sklearn.linear_model import ElasticNet
-from sklearn.ensemble import RandomForestRegressor
+#from sklearn.linear_model import ElasticNet
+#from sklearn.ensemble import RandomForestRegressor
 from sklearn.ensemble import AdaBoostRegressor
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.model_selection import GridSearchCV
@@ -11,7 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import M_learning_images as im
 from sklearn.model_selection import train_test_split
-import seaborn as sns
+#import seaborn as sns
 import random
 
 #Lunghezza media delle reads simulate e reali, comunque un fattore di normalizzazione che dovrebbe valere per entrambi
@@ -30,13 +30,12 @@ params = params_Ada
 Transform_the_targets = None # "Log_shift" "Logistic" None
 subsample_counts = 1
 Eliminate_extreme_samples = False
-WHICH = "Synth_on_Real_assembled_genomes_0.1" #"Synth_on_Real_assembled_genomes_0.1_10_S_strins" #Synth_on_Real_assembled_genomes_0.1
 Add_second_degree_features = False
 Images = True
 
 if(WHICH == "Synth_on_Real_assembled_genomes_0.1"):
 	t = campioni[campioni["Size"] == 0.1]
-	Train = ["samples_2/" + x for x in t[t["Real/Simul"] == "Simul"].index]
+	Train = ["samples_2/" + x for x in t[t["Real/Simul"] == "Simul_perfected"].index]
 	#Train = ["samples_2/" + x for x in t[t["Real/Simul"] == "De_Caesar_simul"].index]
 	Test = ["samples_2/" + x for x in t[t["Real/Simul"] == "Real"].index]
 	print("Synth_on_Real_assembled_genomes_0.1")

@@ -43,13 +43,18 @@ def make_config(input_tsv, input_json, output_path):
 		print("compress = 1", file=conf)
 
 		print("\n[ReadSimulator]", file=conf)
-		print("readsim = CAMISIM/tools/art_illumina-2.3.6/art_illumina", file=conf)
-		print("error_profiles = CAMISIM/tools/art_illumina-2.3.6/profiles", file=conf)
-		print("samtools = CAMISIM/tools/samtools-1.3/samtools", file=conf)
-		print("profile = mbarc", file=conf)
+		print("readsim = MetaGeSim-AMR/tools/art_illumina-2.3.6/art_illumina", file=conf)
+		print("error_profiles = MetaGeSim-AMR/tools/art_illumina-2.3.6/profiles", file=conf)
+		print("samtools = MetaGeSim-AMR/tools/samtools-1.3/samtools", file=conf)
+		if "error_profile" in j:
+			print("profile = "+str(j["error_profile"]), file=conf)
+			print("base_profile_name = "+str(j["base_profile_name"]), file=conf)
+			print("profile_read_length = "+str(j["profile_read_length"]), file=conf)
+		else:
+			print("profile = mbarc", file=conf)
 		print("size = "+str(j["size"]), file=conf)
 		print("type = art", file=conf)
-		print("fragments_size_mean = "+str(j["fragm_size_mean"]), file=conf)
+		print("fragments_size_mean = "+j["fragm_size_mean"].split(".")[0], file=conf)
 		print("fragment_size_standard_deviation = "+str(j["fragm_size_std_dev"]), file=conf)
 
 		print("\n[CommunityDesign]", file=conf)

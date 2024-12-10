@@ -7,22 +7,66 @@ wild_card_version = "4.0.0"
 card_version = "3.2.6"
 import os
 
-Populations = os.listdir("samples/",)
 Populations2 = os.listdir("samples_2/",)
+Populations3 = os.listdir("samples_3/",)
 
-rule terminated:
+
+rule terminated_2:
 	input:
-				alignments = expand("samples/{pop}/paired_alignment", pop=Populations),
 				alignments2 = expand("samples_2/{pop}/paired_alignment", pop=Populations2)
-# 				kmer_counts = expand("{pop}/single_kmer_count", pop=Populations),
-#				single_end_reads = expand("samples/{pop}/reads.fastq", pop=Populations)
-#				pop_configurations = expand("samples/{pop}/config.ini", pop=Populations)
 	output:
-		"TERMINATED"
+		"TERMINATED_2"
 	shell:
 		"""
 		date
-		touch TERMINATED
+		touch TERMINATED_2
+		"""
+
+rule terminated_eliminate_reads_2:
+	input:
+				alignments2 = expand("samples_2/{pop}/paired_alignment_eliminate_reads", pop=Populations2)
+	output:
+		"TERMINATED_no_reads_2"
+	shell:
+		"""
+		date
+		touch TERMINATED_no_reads_2
+		"""
+
+rule terminated_3:
+	input:
+				alignments3 = expand("samples_3/{pop}/paired_alignment", pop=Populations3)
+	output:
+		"TERMINATED_3"
+	shell:
+		"""
+		date
+		touch TERMINATED_3
+		"""
+
+rule terminated_eliminate_reads_3:
+	input:
+				alignments3 = expand("samples_3/{pop}/paired_alignment_eliminate_reads", pop=Populations3)
+	output:
+		"TERMINATED_no_reads_3"
+	shell:
+		"""
+		date
+		touch TERMINATED_no_reads_3
+		"""
+
+rule eliminate_reads:
+	input:
+		i_1 = "{sample}/paired_alignment"
+	output:
+		"{sample}/paired_alignment_eliminate_reads"
+	shell:
+		"""
+		rm -f {input.i_1}
+		rm -f {wildcards.sample}/reads_1.fastq
+		rm -f {wildcards.sample}/reads_2.fastq
+		rm -f {wildcards.sample}/reads.fastq
+		touch {wildcards.sample}/paired_alignment_eliminate_reads
 		"""
 
 rule population_set_up_and_Metagesim:
@@ -35,7 +79,7 @@ rule population_set_up_and_Metagesim:
 		"{sample}/reads_2.fastq",
 		"{sample}/reads.fastq"
 	conda: "env.yaml"
-	threads: 6
+	threads: 4
 	resources:
 		mem_mb = 100000
 	shell:
@@ -48,7 +92,6 @@ rule population_set_up_and_Metagesim:
 		python my_scripts/split_pair_end.py {wildcards.sample}/camisim_out/{anno}*/reads/anonymous_reads.fq {wildcards.sample}/
 		mv {wildcards.sample}/camisim_out/{anno}*/reads/anonymous_reads.fq {wildcards.sample}/reads.fastq
 		rm -r {wildcards.sample}/camisim_out/{anno}*/reads
-
 		"""
 
 rule population_set_up:
@@ -141,7 +184,7 @@ rule rgi_bowtie2_paired:
 		"{sample}/paired_alignment",
 		"{sample}/bwt_out/bwt.allele_mapping_data.json"
 	conda: "env.yaml"
-	threads: 5
+	threads: 4
 	shell:
 		"""
 		mkdir -p {wildcards.sample}/bwt_out
@@ -162,7 +205,7 @@ rule rgi_bowtie2_paired_compressed:
 		"{sample}/paired_alignment",
 		"{sample}/bwt_out/bwt.allele_mapping_data.json"
 	conda: "env.yaml"
-	threads: 5
+	threads: 4
 	shell:
 		"""
 		mkdir -p {wildcards.sample}/bwt_out

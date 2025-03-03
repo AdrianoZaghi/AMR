@@ -58,8 +58,8 @@ def make_config(input_tsv, input_json, output_path):
 		print("fragment_size_standard_deviation = "+str(j["fragm_size_std_dev"]), file=conf)
 
 		print("\n[CommunityDesign]", file=conf)
-		print("ncbi_taxdump = CAMISIM/tools/ncbi-taxonomy_20170222.tar.gz", file=conf)
-		print("strain_simulation_template = CAMISIM/scripts/StrainSimulationWrapper/sgEvolver/simulation_dir", file=conf)
+		print("ncbi_taxdump = MetaGeSim-AMR/tools/ncbi-taxonomy_20170222.tar.gz", file=conf)
+		print("strain_simulation_template = MetaGeSim-AMR/scripts/StrainSimulationWrapper/sgEvolver/simulation_dir", file=conf)
 		print("number_of_samples = 1", file=conf)
 
 		print("\n[community0]", file=conf)

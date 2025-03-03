@@ -6,7 +6,6 @@ __pycache__
 samples/*
 samples_2/*
 samples_3/*
-M_learning_images*
 fastqc*
 Real_samples_de_Caesar/*
 Trimming*

@@ -42,7 +42,7 @@ def plot_results(target, prediction, filename = None, R2 = None, x_up_lim = None
 	if not filename == None:
 		plt.savefig(filename)
 
-def plot_results_2(target, prediction, colors = None, legend = None, filename = None, R2 = None, x_up_lim = None, x_low_lim = None, y_up_lim = None, y_low_lim = None):
+def plot_results_2(target, prediction, colors = None, legend = None, filename = None, Score = None, x_up_lim = None, x_low_lim = None, y_up_lim = None, y_low_lim = None, Score_name = ""):
 	"""Plots the target vs the prediction of a model
 	The is a scatter plot: in an optimal case, the points should be on the line y=x
 	Args:
@@ -70,8 +70,8 @@ def plot_results_2(target, prediction, colors = None, legend = None, filename = 
 	ax.set_xlabel("Target")
 	ax.set_ylabel("Predictions")
 	title = "Target vs Prediction"
-	if R2 is not None:
-		title += ": R2 = " + str(round(R2,4))
+	if Score is not None:
+		title += ": "+Score_name+" = " + str(round(Score,4))
 	ax.set_title(title)
 	if legend is not None:
 		legend_elements = [Line2D([0], [0], marker='o', color='w', label=label, markerfacecolor=color, markersize=10) for label, color in legend.items()]
@@ -343,7 +343,6 @@ def read_abundances_from_tax_ettore(popolazioni,  correspondance_SubSamp:[None, 
 	df_return = df_return.div(G_len, axis=1)
 	return df_return.div(df_return.sum(axis=1), axis=0)
 
-
 def regression(Train, Test, Train_target, classifier, parameter_space, Keep_columns_that_appear_just_in_one_set = False):
 	"""Performs a regression on the Train data and predicts the Test data
 	Returns a dictionary with:
@@ -384,7 +383,6 @@ def log_odds(dict, upper_saturation = 0.99999, lower_saturation = 0.00001):
 	ods = {k : v/(1 - v) for k, v in adjust_boundaries.items()}
 	return {k : np.log(v) for k, v in ods.items()}
 	
-
 def log_shift(dict, shift = 1):
 	return {k: np.log(v + shift) for k, v in dict.items()}
 
@@ -452,3 +450,77 @@ def heatmap_abundance(Data, Target = None, F_imp = None, Normalize = False, satu
 	if not filename == None:
 		plt.savefig(filename)
 	return d
+
+def read_alignement_json(file, mapq_average_min = -1, mapq_average_max = 10000, just_completely_mapped=True, read_length = 255, plot = False): 
+    Resistome={}
+    Infos = {}
+    with open(file, mode = "r") as f:
+        dati_ = json.load(f)
+        dati = [di for di in dati_ if isinstance(di, dict)]
+        for seq in dati:
+            seq_id = str(seq["id"])
+            mapq_average = float(seq["mapq_average"])
+            if mapq_average > mapq_average_min and mapq_average < mapq_average_max:
+                if just_completely_mapped:
+                    aro_count = int(seq["reads"]["mapped"])
+                else:
+                    aro_count = int(seq["reads"]["all"])
+                if seq_id in Resistome.keys():
+                    Resistome[seq_id] += aro_count * read_length / int(seq["reference"]["sequence_length"])
+                else:
+                    Resistome[seq_id] = aro_count * read_length / int(seq["reference"]["sequence_length"])
+                if seq_id not in Infos.keys():
+                    Infos[seq_id] = {"ref_len": [seq["reference"]["sequence_length"]], "N_hits": aro_count}
+                else:
+                    Infos[seq_id]["ref_len"].append(seq["reference"]["sequence_length"])
+                    Infos[seq_id]["N_hits"] += aro_count
+    if plot:
+        Resistome_sorted = dict(sorted(Resistome.items(), key=lambda item: item[1], reverse=True)[:20])
+        for x in Resistome_sorted.keys():
+            print(x)
+        pd.Series(Resistome).sort_values(ascending=False).head(20).plot(kind='bar', figsize=(10, 6), width=0.8)
+        plt.title('Allineamenti dei campioni interi della Decesare con CARD: JSON file')
+        plt.xlabel('Geni')
+        plt.ylabel("Abbondanza")
+        plt.show()
+    return Resistome, Infos
+
+def read_alignement_json_subsample(file, mapq_average_min = -1, mapq_average_max = 10000, just_completely_mapped=True, read_length = 255, subsample = 1): 
+	Resistome={}
+	Infos = {}
+	with open(file, mode = "r") as f:
+		dati_ = json.load(f)
+		dati = [di for di in dati_ if isinstance(di, dict)]
+		for seq in dati:
+			seq_id = str(seq["id"])
+			mapq_average = float(seq["mapq_average"])
+			if mapq_average > mapq_average_min and mapq_average < mapq_average_max:
+				if just_completely_mapped: aro_count = int(seq["reads"]["mapped"])
+				else: aro_count = int(seq["reads"]["all"])
+				if subsample < 1: aro_count = np.random.binomial(n=aro_count, p=subsample)
+				if seq_id in Resistome.keys(): Resistome[seq_id] += aro_count * read_length / int(seq["reference"]["sequence_length"])
+				else: Resistome[seq_id] = aro_count * read_length / int(seq["reference"]["sequence_length"])
+				if seq_id not in Infos.keys(): Infos[seq_id] = {"ref_len": [seq["reference"]["sequence_length"]], "N_hits": aro_count}
+				else:
+					Infos[seq_id]["ref_len"].append(seq["reference"]["sequence_length"])
+					Infos[seq_id]["N_hits"] += aro_count
+	return Resistome, Infos
+
+def read_many_alignements_json(files, mapq_average_min = -1, mapq_average_max = 10000, just_completely_mapped=True, read_length = 255, subsample = 1):
+	r = {}
+	for i in files:
+		if subsample == 1:
+			Resistome, _ = read_alignement_json(i, mapq_average_min = mapq_average_min, 
+												mapq_average_max = mapq_average_max,
+												just_completely_mapped = just_completely_mapped,
+												read_length = read_length)
+		else:
+			Resistome, _ = read_alignement_json_subsample(i, mapq_average_min = mapq_average_min, 
+												mapq_average_max = mapq_average_max,
+												just_completely_mapped = just_completely_mapped,
+												read_length = read_length,
+												subsample = subsample)
+		name = i.split("/")[-3]
+		r[name] = Resistome
+	r = pd.DataFrame(r).fillna(0)
+	return r

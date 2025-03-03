@@ -1,5 +1,4 @@
-import json
-import sys
+#%%
 import pandas as pd
 #from sklearn.linear_model import ElasticNet
 #from sklearn.ensemble import RandomForestRegressor
@@ -13,6 +12,7 @@ import M_learning_images as im
 from sklearn.model_selection import train_test_split
 #import seaborn as sns
 import random
+import os
 
 #Lunghezza media delle reads simulate e reali, comunque un fattore di normalizzazione che dovrebbe valere per entrambi
 #potrebbe essere diverso tra simulate e reali
@@ -28,55 +28,60 @@ params_Ada = {"loss":["linear", "square", "exponential"], "learning_rate":[0.1, 
 model = Ada
 params = params_Ada
 Transform_the_targets = None # "Log_shift" "Logistic" None
-subsample_counts = 1
-Eliminate_extreme_samples = False
-Add_second_degree_features = False
 Images = True
+samples_dir = "samples_2/"
+species_per_genome = 5
+save_dir = "Sembra_che_funzioni_depth_"+ str(species_per_genome) +"_strains/"
+if os.path.exists(save_dir) == False:
+	os.makedirs(save_dir)
 
-if(WHICH == "Synth_on_Real_assembled_genomes_0.1"):
-	t = campioni[campioni["Size"] == 0.1]
-	Train = ["samples_2/" + x for x in t[t["Real/Simul"] == "Simul_perfected"].index]
-	#Train = ["samples_2/" + x for x in t[t["Real/Simul"] == "De_Caesar_simul"].index]
-	Test = ["samples_2/" + x for x in t[t["Real/Simul"] == "Real"].index]
-	print("Synth_on_Real_assembled_genomes_0.1")
+t = campioni[campioni["Size"] == 0.1]
 
-Train_target = im.read_metadata(Train)["Abundances_r"]
-Test_target = im.read_metadata(Test)["Abundances_r"]
+t_train = t[t["Aureus_R_N_strains"] == species_per_genome]
+t_train = t_train[t_train["Real/Simul"] == "Simul"]
+Train = [samples_dir + x + "/bwt_out/bwt.allele_mapping_data.json" for x in t_train.index]
+t_train = t_train[["Aureus_S", "Aureus_R", "Coli", "Pseudomonas", "Arcobacter"]]
+t_train = t_train.div(t_train.sum(axis=1), axis=0) #non si sa mai
+t_train = t_train[["Aureus_R", "Coli", "Pseudomonas"]].sum(axis=1)
+Train_target = dict(zip(t_train.index, t_train.values))
 
-t_test = t[t["Real/Simul"] == "Real"]
+t_test = t[t["Aureus_R_N_strains"] == 0]
+t_test = t_test[t_test["Real/Simul"] == "Real"]
+Test = [samples_dir + x + "/bwt_out/bwt.allele_mapping_data.json" for x in t_test.index]
 t_test = t_test[["Aureus_S", "Aureus_R", "Coli", "Pseudomonas", "Arcobacter"]]
-
-bias_De_caesar = {'Aureus_S': 4.96,
- 'Aureus_R': 4.96,
- 'Coli': 1,
- 'Pseudomonas': 1,
- 'Arcobacter': 1}
-
-bias_simul ={"Aureus_S": 6.63,#5.03,#5.22
-  "Aureus_R": 6.63,#5.03,#5.22
-  "Coli": 1,
-  "Pseudomonas": 1,
-  "Arcobacter": 1}
-
-t_test = t_test.mul(bias_simul, axis=1)
-#Normalizzo le abbondanze aggiustate e sommo le abbondanze di Aureus_R, Coli e Pseudomonas per ottenere la resistenza
-t_test = t_test.div(t_test.sum(axis=1), axis=0)
+t_test = t_test.div(t_test.sum(axis=1), axis=0) #non si sa mai
 t_test = t_test[["Aureus_R", "Coli", "Pseudomonas"]].sum(axis=1)
-Test_target_aggiustato = dict(zip(t_test.index, t_test.values))
+Test_target = dict(zip(t_test.index, t_test.values))
 
+MAPQ_MIN = 0
+MAPQ_MAX = 1000
+JUST_COMPLETE = True
+average_read_length = 270
 depths = [0.001, 0.003, 0.007, 0.01, 0.05, 0.1, 0.5, 1]
 Results = {}
+#%%
 for sub in depths:
 	print("Depth: "+str(sub)+" ", end = '')
 	R2s_for_a_dept = []
 	for i in range(0,6):
 		print(".", end = '')
-		Test_data, Train_data = im.read_bwt_2_aro(Test, sub), im.read_bwt_2_aro(Train, sub)
+		#Test_data, Train_data = im.read_bwt_2_aro(Test, sub), im.read_bwt_2_aro(Train, sub)
+		Train_data = im.read_many_alignements_json(Train,
+											 just_completely_mapped=JUST_COMPLETE,
+											 mapq_average_min=MAPQ_MIN,
+											 mapq_average_max=MAPQ_MAX,
+											 read_length=average_read_length,
+											 subsample=sub).T
+		Test_data = im.read_many_alignements_json(Test,
+											just_completely_mapped=JUST_COMPLETE,
+											mapq_average_min=MAPQ_MIN,
+											mapq_average_max=MAPQ_MAX,
+											read_length=average_read_length,
+											subsample=sub).T											 	
 		missing_in_Test, missing_in_Train = [c for c in Train_data.columns if c not in Test_data.columns], [c for c in Test_data.columns if c not in Train_data.columns]
 		Test_data, Train_data = Test_data.drop(columns=missing_in_Train), Train_data.drop(columns=missing_in_Test)
 		Test_data, Train_data = Test_data.sort_index(axis=1), Train_data.sort_index(axis=1)
 		print("Dati letti.\nSto usando "+str(len(Train_data.columns))+" colonne nel fit")
-		
 		grid = GridSearchCV(model, params, n_jobs=-1, refit=True, cv=5, verbose=0, scoring="r2")
 		#Fitting the model
 		grid.fit(Train_data, list(Train_target.values()))
@@ -91,7 +96,7 @@ for sub in depths:
 	Results["Subsample " + str(sub)] = {"R2" : R2s_for_a_dept, "Best_estimator" : best}
 	if Images:
 		#Plotting results["Best_estimator"]
-		im.plot_results(list(Test_target.values()), list(Test_predictions.values()), "M_learning_images/Depth_subsample_" + str(sub) + ".png", R2 = R2)
+		im.plot_results(list(Test_target.values()), list(Test_predictions.values()), save_dir+"/Depth_subsample_" + str(sub) + ".png", R2 = R2)
 		#Feature importance
 		#F_imp = im.feature_importance(Train_data, best, "M_learning_images/"+WHICH+"_feature_importance.png")
 		#plt.clf()
@@ -103,16 +108,21 @@ R2s["Subsample"] = R2s["Subsample"]*0.1
 R2s["Average R2"] = R2s["R2"].apply(np.mean)
 R2s["R2 errors"] = R2s["R2"].apply(np.std)
 R2s.to_csv("M_learning_images/R2s_depth_effects_patric.csv")
-plt.errorbar(R2s['Subsample'], R2s['Average R2'], yerr=R2s['R2 errors'], fmt='o')
-plt.xscale('log')
-ax = plt.gca()
+fig, ax = plt.subplots(figsize=(10, 6))
+# Plot the data with error bars
+ax.errorbar(R2s['Subsample'], R2s['Average R2'], yerr=R2s['R2 errors'], fmt='o')
+# Set the x-axis scale to logarithmic
+ax.set_xscale('log')
+# Add a horizontal line at y=1
 ax.axhline(y=1, color='r', linestyle='--')
-ax.set_ylim(0,1.1)
-ax.set_title("Effect of sample depth")
-# Set the labels of the axes
-plt.xlabel('Subsample size (Gbp)')
-plt.ylabel('R2')
+# Set y-axis limits
+ax.set_ylim(0, 1.1)
+# Set the title and labels
+ax.set_title("Effect of Sample Depth")
+ax.set_xlabel('Subsample Size (Gbp)')
+ax.set_ylabel('R2')
 
 # Show the plot
 #plt.show()
-plt.savefig("M_learning_images/R2s_depth_effects_patric.png")
+plt.savefig(save_dir+"/R2s_depth_effects.png")
+# %%

@@ -85,25 +85,24 @@ colormap = cm.viridis  # Puoi scegliere altre mappe di colori come 'plasma', 'ci
 test_target_colors = [colormap(norm(value)) for value in test_target_values]
 
 Train_data_PATRIC = Train_data_PATRIC.T
-Train_data_PATRIC_5_genomes = Train_data_PATRIC[(Train_target_PATRIC_complexity == 5).values]
 Train_data_Assembled = Train_data_Assembled.T
-Train_Assembled_5_genomes = Train_data_Assembled[(Train_Assembled_complexity == 5).values]
 Test_data = Test_data.T
-Test_data_complexity_5 = Test_data[select_target_complexity == 5]
 
 Tot_cols = set(Train_data_PATRIC.columns.to_list() + Train_data_Assembled.columns.to_list() + Test_data.columns.to_list())
-print(len(Tot_cols))
-#Put all the dataframe together adding 0 for the missing columns
 Train_data_PATRIC = Train_data_PATRIC.reindex(columns=Tot_cols, fill_value=0)
 Train_data_Assembled = Train_data_Assembled.reindex(columns=Tot_cols, fill_value=0)
 Test_data = Test_data.reindex(columns=Tot_cols, fill_value=0)
+Train_data_PATRIC_5_genomes = Train_data_PATRIC[(Train_target_PATRIC_complexity == 5).values]
+Train_Assembled_5_genomes = Train_data_Assembled[(Train_Assembled_complexity == 5).values]
+Test_data_complexity_5 = Test_data[select_target_complexity == 5]
 
-#%%
-#Append the dataframes
 Tot_data = pd.concat([Train_data_PATRIC, Train_data_Assembled, Test_data], axis=0)
 Data_Train_sets = pd.concat([Train_data_PATRIC, Train_data_Assembled], axis=0)
+Tot_data_5_genomes = pd.concat([Train_data_PATRIC_5_genomes, Train_Assembled_5_genomes, Test_data_complexity_5], axis=0)
+#%%
+#Append the dataframes
 #make a PCA coloring it based on the origin of the data
-Data_for_PCA_fitting = Tot_data
+Data_for_PCA_fitting = Tot_data #Data_Train_sets
 pca = PCA(n_components=2)
 #Standardizza i dati
 PCA_scaler = StandardScaler()
@@ -159,7 +158,42 @@ axes[1].legend(handles=custom_legend_resistance, title="Test Resistance Colors",
 plt.tight_layout()
 plt.savefig("PCA_samples_features.png")
 
-
 #%%
 #PCA con i campioni che hanno 5 speci
+pca_5 = PCA(n_components=2)
+PCA_scaler_5 = StandardScaler()
+PCA_scaler_5 = PCA_scaler_5.fit(Tot_data_5_genomes)
+print("Ho fittato lo scaler")
+Tot_data_5_genomes = PCA_scaler_5.transform(Tot_data_5_genomes)
+pca_5.fit(Tot_data_5_genomes)
+print("Ho fittato la PCA")
+Train_data_PATRIC_5_genomes_PCA = pca_5.transform(PCA_scaler_5.transform(Train_data_PATRIC_5_genomes))
+print("Ho fatto la PCA di PATRIC")
+Train_Assembled_5_genomes_PCA = pca_5.transform(PCA_scaler_5.transform(Train_Assembled_5_genomes))
+print("Ho fatto la PCA di Assembled")
+Test_data_5_genomes_PCA = pca_5.transform(PCA_scaler_5.transform(Test_data_complexity_5))
+#%%
+#plotta tutti i punti distinguendoli per il databse di appartenenza
+fig, ax = plt.subplots(figsize=(12, 6))
+# Primo scatterplot
+ax.scatter(Train_data_PATRIC_5_genomes_PCA[:, 0], Train_data_PATRIC_5_genomes_PCA[:, 1], c="red", alpha=0.3, label="PATRIC")
+ax.scatter(Train_Assembled_5_genomes_PCA[:, 0], Train_Assembled_5_genomes_PCA[:, 1], c="orange", alpha=0.3, label="Assembled")
+ax.scatter(Test_data_5_genomes_PCA[:, 0], Test_data_5_genomes_PCA[:, 1], c="green", label="Test (Complexity)")
+ax.set_title("PCA con solo i campioni con 5 specie")
+ax.set_xlabel("PC1")
+ax.set_ylabel("PC2")
+# Aggiungi una legenda per i colori dei dati di test
+custom_legend = [
+    plt.Line2D([0], [0], marker='o', color='w', alpha=0.3, markerfacecolor="orange", markersize=10, label="Assembled"),
+    plt.Line2D([0], [0], marker='o', color='w', alpha=0.3, markerfacecolor="red", markersize=10, label="PATRIC"),
+    plt.Line2D([0], [0], marker='o', color='w', markerfacecolor="green", markersize=10, label="Test (Complexity)"),
+]
+ax.legend(handles=custom_legend, title="Database Colors", loc="upper right")
+# Mostra il grafico
+plt.tight_layout()
+plt.savefig("PCA_samples_features_5_genomes.png")
+#%%
+
+
+
 

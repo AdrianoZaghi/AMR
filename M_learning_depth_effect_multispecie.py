@@ -1,11 +1,10 @@
 import json
 import sys
 import pandas as pd
-#from sklearn.linear_model import ElasticNet
-#from sklearn.ensemble import RandomForestRegressor
+import os
 from sklearn.ensemble import AdaBoostRegressor
 from sklearn.tree import DecisionTreeRegressor
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GridSearchCV, KFold, cross_val_predict
 from sklearn.metrics import r2_score
 import numpy as np
 import matplotlib.pyplot as plt
@@ -28,6 +27,8 @@ params_Ada = {"loss":["linear", "square", "exponential"], "learning_rate":[0.1, 
 
 model = Ada
 params = params_Ada
+saving_path = "Sembra_che_funzioni_multispecie_prove/"
+os.makedirs(saving_path, exist_ok=True)
 
 t = campioni[campioni["Size"] == 0.1]
 Train = ["samples_3/" + x for x in t[t["Real/Simul"] == "Simul_perfected"].index]
@@ -42,7 +43,6 @@ JUST_COMPLETE = True
 MAPQ_MIN = -1
 MAPQ_MAX = 1000
 average_read_length = 270
-#SCORING = ["RMSE", "R2"]
 SCORING = ["R2"]
 TARGET = ["Pathogens", "Resistant", "Resistant_in_pathogens"]
 depths = [0.001, 0.003, 0.007, 0.01, 0.05, 0.1, 0.5, 1]
@@ -58,33 +58,54 @@ for scoring in SCORING:
 		Results = {}
 		for sub in depths:
 			print("Depth: "+str(sub))
-			for i in range(0,1):
-				#Train_data = im.read_bwt_2_aro(Train, sub)
-				Train_data = im.read_many_alignements_json(Train_features_path, 
-														just_completely_mapped=JUST_COMPLETE,
-														mapq_average_min=MAPQ_MIN,
-														mapq_average_max=MAPQ_MAX,
-														read_length=average_read_length,
-														subsample=sub).T
-				if scoring == "R2":
-					grid = GridSearchCV(model, params, n_jobs=-1, refit=False, cv=10, verbose=0, scoring="r2")
-					score_sign = 1
-				elif scoring == "RMSE":
-					grid = GridSearchCV(model, params, n_jobs=-1, refit=False, cv=10, verbose=0, scoring=rmse_scorer)
-					score_sign = -1
-				grid.fit(Train_data, list(Train_target))
-				train_average_score = score_sign * np.mean(grid.cv_results_["mean_test_score"])
-				print("Score: "+str(train_average_score))
-				train_std_score = np.std(grid.cv_results_["mean_test_score"])
-				Results["Subsample "+str(sub)] = {scoring:train_average_score, scoring + "_std":train_std_score}
-
-		save_path = "Sembra_che_funzioni_multispecie/"+scoring+"_depth_effects_"+target
-		pd.DataFrame(Results).T.to_csv(save_path+".csv")
+			#Train_data = im.read_bwt_2_aro(Train, sub)
+			Train_data = im.read_many_alignements_json(Train_features_path, 
+													just_completely_mapped=JUST_COMPLETE,
+													mapq_average_min=MAPQ_MIN,
+													mapq_average_max=MAPQ_MAX,
+													read_length=average_read_length,
+													subsample=sub).T
+			if scoring == "R2":
+				grid = GridSearchCV(model, params, n_jobs=-1, refit=True, cv=10, verbose=0, scoring="r2")
+				score_sign = 1
+			elif scoring == "RMSE":
+				grid = GridSearchCV(model, params, n_jobs=-1, refit=True, cv=10, verbose=0, scoring=rmse_scorer)
+				score_sign = -1
+			print("Start looking for best hyperparams")
+			grid.fit(Train_data, list(Train_target))
+			best_model = grid.best_estimator_
+			cross_val_del_best = KFold(n_splits=10, shuffle=True, random_state=0)
+			print("Start cross validation with best model")
+			predictions = cross_val_predict(best_model, Train_data, list(Train_target), cv=cross_val_del_best, n_jobs=-1)
+			#Per ottenere la media dello score, facio una media dei valori ottenuti con la cross validation
+			print("Average_score",r2_score(list(Train_target), predictions))
+			R2_per_fold = []
+			for _, test_id in cross_val_del_best.split(Train_data):
+				R2_per_fold.append(r2_score(np.array(Train_target)[test_id], np.array(predictions)[test_id]))
+			#Per ottenere la deviazione standard, faccio la deviazione standard dei valori ottenuti con la cross validation
+			#La deviazione standard della media è la deviazione standard divisa per la radice del numero di fold???
+			train_std_score = np.std(R2_per_fold)/np.sqrt(10)
+			Results["Subsample "+str(sub)] = {scoring:np.mean(R2_per_fold), scoring + "_std":train_std_score}
+			if sub == 1:
+				predictions = np.array(predictions)
+				Train_target = np.array(Train_target)
+				#Salvo le previsioni e i valori reali
+				dati_scatterplot = pd.DataFrame({"Real":Train_target, "Predictions":predictions})
+				dati_scatterplot.to_csv(saving_path + "scatterplot_data_" + target + ".csv")
+				fig, ax = plt.subplots(figsize=(8, 6))
+				ax.scatter(Train_target, predictions, color='blue')
+				ax.plot([0, 1], [0, 1], color='red', linestyle='--')  # Linea di riferimento y=x
+				ax.set_xlabel('Valori Reali')
+				ax.set_ylabel('Predizioni')
+				ax.set_title('Scatterplot delle Predizioni vs Valori Reali')
+				ax.grid(True)
+				plt.savefig(saving_path + scoring + "_scatterplot_" + target + ".png")
+		save = saving_path+scoring+"_depth_effects_"+target
+		pd.DataFrame(Results).T.to_csv(save+".csv")
 		Scores = [v[scoring] for _,v in Results.items()]
 		Scores_std = [v[scoring+"_std"] for _,v in Results.items()]
 
 		fig, ax = plt.subplots(figsize=(10, 6))
-		# Crea il grafico a barre con le barre di errore
 		ax.errorbar(depths, Scores, yerr=Scores_std, fmt='o')
 		ax.set_xscale('log')
 		ax.axhline(y=1, color='r', linestyle='--')
@@ -93,6 +114,4 @@ for scoring in SCORING:
 		ax.set_title("Effect of sample depth")
 		ax.set_xlabel('Subsample size (Gbp)')
 		ax.set_ylabel(scoring)
-
-		# Salva il grafico
-		plt.savefig(save_path + ".png")
+		plt.savefig(save + ".png")

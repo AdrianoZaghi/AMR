@@ -10,12 +10,12 @@ def make_abundance(input_tsv, output_path):
 		for index, row in t.iterrows():
 			print(row["Genome_ID"]+"\t"+str(row["Abundance"]), file=abu)
 
-def make_genome_to_id(input_tsv, output_path):
+def make_genome_to_id(input_tsv, output_path, genomes_dir = "genomes"):
 	with open(input_tsv, mode="r") as tsv:
 		t = pd.read_csv(tsv, sep='\t')
 	with open(output_path+"/genome_to_id.tsv", mode="w") as to_id:
 		for index, row in t.iterrows():
-			print(row["Genome_ID"]+"\t"+os.getcwd()+"/genomes/"+row["Genome_file"], file=to_id)
+			print(row["Genome_ID"]+"\t"+os.getcwd()+"/"+genomes_dir+"/"+row["Genome_file"], file=to_id)
 
 def make_metadata(input_tsv, output_path):
 	with open(input_tsv, mode="r") as tsv:
@@ -84,9 +84,10 @@ def make_config(input_tsv, input_json, output_path):
 
 input_tsv = sys.argv[1]
 input_json = sys.argv[2]
+genomes_dir = sys.argv[3]
 output_path = input_tsv.split("/input.tsv")[0]
 
 make_metadata(input_tsv, output_path)
 make_abundance(input_tsv, output_path)
-make_genome_to_id(input_tsv, output_path)
+make_genome_to_id(input_tsv, output_path, genomes_dir)
 make_config(input_tsv, input_json, output_path)

@@ -100,6 +100,21 @@ def genera_df_multispecie(Quanti_campioni, Pronome, Size, Strain_counts_same_for
     df.set_index("Nome", inplace = True)
     return df
 
+def genera_proporzioni_assembled(Quanti_campioni, Pronome, Size, Strain_counts_same_for_all , reads_len, Lower_Seed = 1):
+    data = []
+    possible_bacteria = ["Aureus_S","Aureus_R","Coli","Pseudomonas","Arcobacter", "Aureus_S_1","Aureus_R_1","Coli_1","Pseudomonas_1","Arcobacter_1"]
+    for i in range(0,Quanti_campioni):
+        quanti_batteri = random.randint(1,len(possible_bacteria))
+        quali_batteri = random.sample(possible_bacteria, quanti_batteri)
+        pop = genera_proporzioni(quali_batteri, lista=possible_bacteria)
+        Nome = Pronome + str(i)
+        sample = [Nome] + pop + [Size, "Simul", "Campione_simulato", Lower_Seed + i + 1] + [Strain_counts_same_for_all] + [reads_len]
+        data.append(sample)
+    df = pd.DataFrame(data, columns=["Nome"] + possible_bacteria +["Size","Real/Simul","Original sample","Seed","N_strains_for_all", "reads_length"])
+    df.set_index("Nome", inplace = True)
+    return df
+
+
 if False:
     #controllando la distribuzione delle proporzioni generate dal mio modello
     data = []
@@ -116,5 +131,6 @@ if False:
 
 seed = int(input("Please enter the lower value fot the seed: "))
 #DD = genera_df(Quanti_campioni=1000, Pronome="Halloween_2024_", Size=0.1, Strain_counts=[1,1,1,1,1], Genome_source="Simul_perfected", reads_len=255,Lower_Seed=seed)
-DD = genera_df_multispecie(Quanti_campioni=1000, Pronome="22_11_2024_", Size=0.1, Strain_counts_same_for_all=1, Genome_source="Simul_perfected", reads_len=255,Lower_Seed=seed)
+#DD = genera_df_multispecie(Quanti_campioni=1000, Pronome="22_11_2024_", Size=0.1, Strain_counts_same_for_all=1, Genome_source="Simul_perfected", reads_len=255,Lower_Seed=seed)
+DD = genera_proporzioni_assembled(Quanti_campioni=800, Pronome="14_03_2025_", Size=0.1, Strain_counts_same_for_all=1, reads_len=255,Lower_Seed=seed)
 DD.to_csv("Da_aggiungere.csv")

@@ -1,7 +1,7 @@
 assembly_K_list = "27,47,67,87,107,127"
 rgi_annotation_alignment_tool = "BLAST"
 k_mer_size = 27
-anno = "2024"
+anno = "2025"
 max_count = 120000000
 wild_card_version = "4.0.0"
 card_version = "3.2.6"
@@ -9,6 +9,7 @@ import os
 
 Populations2 = os.listdir("samples_2/",)
 Populations3 = os.listdir("samples_3/",)
+Populations4 = os.listdir("samples_4/",)
 
 
 rule terminated_2:
@@ -44,15 +45,15 @@ rule terminated_3:
 		touch TERMINATED_3
 		"""
 
-rule terminated_eliminate_reads_3:
+rule terminated_eliminate_reads_4:
 	input:
-				alignments3 = expand("samples_3/{pop}/paired_alignment_eliminate_reads", pop=Populations3)
+				alignments3 = expand("samples_4/{pop}/paired_alignment_eliminate_reads", pop=Populations4)
 	output:
-		"TERMINATED_no_reads_3"
+		"TERMINATED_no_reads_4"
 	shell:
 		"""
 		date
-		touch TERMINATED_no_reads_3
+		touch TERMINATED_no_reads_4
 		"""
 
 rule eliminate_reads:
@@ -69,11 +70,12 @@ rule eliminate_reads:
 		touch {wildcards.sample}/paired_alignment_eliminate_reads
 		"""
 
+genomes_dir = "Consensus_genomes_assembled"
 rule population_set_up_and_Metagesim:
 	input:
 		per_distinguere_questa_regola_da_camisim = "{sample}/USE_METAGESIM",
 		i_1 = "{sample}/input.tsv",
-		i_2 = "{sample}/input.json"
+		i_2 = "{sample}/input.json",
 	output:
 		"{sample}/reads_1.fastq",
 		"{sample}/reads_2.fastq",
@@ -84,7 +86,7 @@ rule population_set_up_and_Metagesim:
 		mem_mb = 100000
 	shell:
 		"""
-		python my_scripts/generate_metagesim_input.py {input.i_1} {input.i_2}
+		python my_scripts/generate_metagesim_input.py {input.i_1} {input.i_2} {genomes_dir}
 		rm -rf {wildcards.sample}/camisim_out
 		mkdir -p tmp
 		python MetaGeSim-AMR/metagenomesimulation2.py {wildcards.sample}/config.ini
@@ -92,6 +94,9 @@ rule population_set_up_and_Metagesim:
 		python my_scripts/split_pair_end.py {wildcards.sample}/camisim_out/{anno}*/reads/anonymous_reads.fq {wildcards.sample}/
 		mv {wildcards.sample}/camisim_out/{anno}*/reads/anonymous_reads.fq {wildcards.sample}/reads.fastq
 		rm -r {wildcards.sample}/camisim_out/{anno}*/reads
+		rm -r {wildcards.sample}/camisim_out/{anno}*/bam/*.bam
+		rm -r {wildcards.sample}/camisim_out/{anno}*/contigs
+		rm -r {wildcards.sample}/camisim_out/source_genomes
 		"""
 
 rule population_set_up:

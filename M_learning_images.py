@@ -15,32 +15,34 @@ from collections import Counter
 
 average_read_length = 270
 
-def plot_results(target, prediction, filename = None, R2 = None, x_up_lim = None, x_low_lim = None, y_up_lim = None, y_low_lim = None):
-	"""Plots the target vs the prediction of a model
-	The is a scatter plot: in an optimal case, the points should be on the line y=x
-	Args:
-		target (list): the target values
-		prediction (list): the predicted values
-		filename (str): the name of the file where the plot will be saved, if None, the plot will be shown
-		R2 (float): the R2 score of the model, it will be shown in the title of the plot
-		x_up_lim, x_low_lim, y_up_lim, x_low_lim (float): the limits of the plot
-	"""
-	plt.plot(target, prediction, 'ro')
-	x=[max([min(target)-0.01, min(prediction)-0.01]), min([max(target)+0.01,max(prediction)+0.01])]
-	y=x
-	plt.plot(x, y, 'k:', lw=2)
-	if x_up_lim is not None or x_low_lim is not None:
-		plt.xlim(x_low_lim, x_up_lim)
-	if y_up_lim is not None or y_low_lim is not None:
-		plt.ylim(x_low_lim, x_up_lim)
-	plt.xlabel("Target")
-	plt.ylabel("Predictions")
-	title = "Target vs Prediction"
-	if R2 is not None:
-		title += ": R2 = " + str(round(R2,4))
-	plt.title(title)
-	if not filename == None:
-		plt.savefig(filename)
+def plot_results(target, prediction, filename=None, R2=None, x_up_lim=None, x_low_lim=None, y_up_lim=None, y_low_lim=None):
+    """Plots the target vs the prediction of a model
+    The is a scatter plot: in an optimal case, the points should be on the line y=x
+    Args:
+        target (list): the target values
+        prediction (list): the predicted values
+        filename (str): the name of the file where the plot will be saved, if None, the plot will be shown
+        R2 (float): the R2 score of the model, it will be shown in the title of the plot
+        x_up_lim, x_low_lim, y_up_lim, x_low_lim (float): the limits of the plot
+    """
+    fig, ax = plt.subplots()
+    ax.plot(target, prediction, 'ro')
+    x = [max([min(target) - 0.01, min(prediction) - 0.01]), min([max(target) + 0.01, max(prediction) + 0.01])]
+    y = x
+    ax.plot(x, y, 'k:', lw=2)
+    if x_up_lim is not None or x_low_lim is not None:
+        ax.set_xlim(x_low_lim, x_up_lim)
+    if y_up_lim is not None or y_low_lim is not None:
+        ax.set_ylim(y_low_lim, y_up_lim)
+    ax.set_xlabel("Target")
+    ax.set_ylabel("Predictions")
+    title = "Target vs Prediction"
+    if R2 is not None:
+        title += ": R2 = " + str(round(R2, 4))
+    ax.set_title(title)
+    if filename is None: plt.show()
+    else: plt.savefig(filename)
+        
 
 def plot_results_2(target, prediction, colors = None, legend = None, filename = None, Score = None, x_up_lim = None, x_low_lim = None, y_up_lim = None, y_low_lim = None, Score_name = ""):
 	"""Plots the target vs the prediction of a model

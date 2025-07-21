@@ -44,7 +44,7 @@ def plot_results(target, prediction, filename=None, R2=None, x_up_lim=None, x_lo
     else: plt.savefig(filename)
         
 
-def plot_results_2(target, prediction, colors = None, legend = None, filename = None, Score = None, x_up_lim = None, x_low_lim = None, y_up_lim = None, y_low_lim = None, Score_name = ""):
+def plot_results_2(target, prediction, colors = None, legend = None, filename = None, Score = None, x_up_lim = 1, x_low_lim = 0, y_up_lim = 1, y_low_lim = 0, Score_name = ""):
 	"""Plots the target vs the prediction of a model
 	The is a scatter plot: in an optimal case, the points should be on the line y=x
 	Args:
@@ -71,13 +71,15 @@ def plot_results_2(target, prediction, colors = None, legend = None, filename = 
 		ax.plot([low, up], [low, up], 'k:', lw=2)
 	ax.set_xlabel("Target")
 	ax.set_ylabel("Predictions")
-	title = "Target vs Prediction"
-	if Score is not None:
+	if Score is not None and Score_name != "":
+		title = "Target vs Prediction"
 		title += ": "+Score_name+" = " + str(round(Score,4))
-	ax.set_title(title)
+		ax.set_title(title)
 	if legend is not None:
 		legend_elements = [Line2D([0], [0], marker='o', color='w', label=label, markerfacecolor=color, markersize=10) for label, color in legend.items()]
 		ax.legend(handles=legend_elements, title="Legend")
+	#Aggiungo griglia
+	ax.grid(True, linestyle='--', alpha=0.5)
 	if not filename == None:
 		plt.savefig(filename)
 
@@ -265,11 +267,15 @@ def read_metadata_multispecie(popolazioni):
 		M_pop = M_pop[["Abundance", "Phenotype"]]
 		tot = sum(M_pop["Abundance"])
 		Pathogen_abundance = M_pop.copy()
-		Pathogen_abundance["Phenotype"].replace(["Non_patogeno", "resistant", "susceptible"], [0,1,1], inplace=True)
+		#Pathogen_abundance["Phenotype"].replace(["Non_patogeno", "resistant", "susceptible"], [0,1,1], inplace=True)
+		Pathogen_abundance["Phenotype_"] = Pathogen_abundance["Phenotype"].replace(["Non_patogeno", "resistant", "susceptible"], [0,1,1])
+		Pathogen_abundance.drop(columns=["Phenotype"], inplace=True)
 		Pathogen_abundance = Pathogen_abundance.prod(axis=1).sum(axis=0)/tot
 		metadata[P] = {"Pathogen_abundance":Pathogen_abundance}
 		Resistant_abundance = M_pop.copy()
-		Resistant_abundance["Phenotype"].replace(["Non_patogeno", "resistant", "susceptible"], [0,1,0], inplace=True)
+		#Resistant_abundance["Phenotype"].replace(["Non_patogeno", "resistant", "susceptible"], [0,1,0], inplace=True)
+		Resistant_abundance["Phenotype_"] = Resistant_abundance["Phenotype"].replace(["Non_patogeno", "resistant", "susceptible"], [0,1,0])
+		Resistant_abundance.drop(columns=["Phenotype"], inplace=True)
 		Resistant_abundance = Resistant_abundance.prod(axis=1).sum(axis=0)/tot
 		metadata[P]["Resistant_abundance"] = Resistant_abundance
 		if Pathogen_abundance == 0:
@@ -487,6 +493,47 @@ def read_alignement_json(file, mapq_average_min = -1, mapq_average_max = 10000, 
         plt.show()
     return Resistome, Infos
 
+def scan_mapping_quality(file ,all_or_mapped = "all"):
+	"""Scans the mapping quality of the reads in a json file
+	Args:
+		file (str): the path of the json file
+	Returns:
+		A list with the mapping quality of each read"""
+	R = []
+	with open(file, mode = "r") as f:
+		dati_ = json.load(f)
+		dati = [di for di in dati_ if isinstance(di, dict)]
+		for seq in dati:
+			S = {"mapq_average": float(seq["mapq_average"]), 
+				"count": int(seq["reads"][all_or_mapped]) / int(seq["reference"]["sequence_length"])}
+			R.append(S)
+	R = pd.DataFrame(R, columns=["mapq_average", "count"])
+	#Sum all the row with the same mapq_average
+	R = R.groupby("mapq_average")["count"].sum().reset_index()
+	return R
+
+def scan_many_mapping_quality(files, all_or_mapped = "all"):
+	"""Scans the mapping quality of the reads in a list of json files
+	Args:
+		files (list): the list of the json files
+	Returns:
+		A dataframe with the mapping quality of each read for each file"""
+	R_ = None
+	for i in files:
+		R = scan_mapping_quality(i, all_or_mapped=all_or_mapped)
+		if R_ is None: R_ = R
+		else: 
+			#Aggiungi le righe del fataframe e groupby quality
+			R_ = pd.concat([R_, R], axis=0)
+			R_.groupby("mapq_average")["count"].sum().reset_index()
+	plt.figure(figsize=(8,6))
+	plt.hist(R_['mapq_average'], bins=44, weights=R_['count'], alpha=0.7, edgecolor='black')
+	plt.xlabel('mapq_average')
+	plt.ylabel('Abbondanza (somma di B)')
+	plt.title('Istogramma binned di A pesato per B')
+	plt.tight_layout()
+	return R_
+
 def read_alignement_json_subsample(file, mapq_average_min = -1, mapq_average_max = 10000, just_completely_mapped=True, read_length = 255, subsample = 1): 
 	Resistome={}
 	Infos = {}
@@ -508,7 +555,7 @@ def read_alignement_json_subsample(file, mapq_average_min = -1, mapq_average_max
 					Infos[seq_id]["N_hits"] += aro_count
 	return Resistome, Infos
 
-def read_many_alignements_json(files, mapq_average_min = -1, mapq_average_max = 10000, just_completely_mapped=True, read_length = 255, subsample = 1):
+def read_many_alignements_json(files,mapq_average_min = -1, mapq_average_max = 10000, just_completely_mapped=True, read_length = 255, subsample = 1):
 	r = {}
 	for i in files:
 		if subsample == 1:
@@ -525,4 +572,46 @@ def read_many_alignements_json(files, mapq_average_min = -1, mapq_average_max = 
 		name = i.split("/")[-3]
 		r[name] = Resistome
 	r = pd.DataFrame(r).fillna(0)
+	return r
+
+def read_alignement_json_subsample_1(file, mapq_average_min = -1, mapq_average_max = 10000, just_completely_mapped=True, read_length = 255, subsample = 1): 
+	Infos = {}
+	with open(file, mode = "r") as f:
+		dati_ = json.load(f)
+		dati = [di for di in dati_ if isinstance(di, dict)]
+		for seq in dati:
+			seq_id = str(seq["id"])
+			mapq_average = float(seq["mapq_average"])
+			if mapq_average > mapq_average_min and mapq_average < mapq_average_max:
+				if just_completely_mapped: aro_count = int(seq["reads"]["mapped"])
+				else: aro_count = int(seq["reads"]["all"])
+				if subsample < 1: aro_count = np.random.binomial(n=aro_count, p=subsample)
+				if seq_id not in Infos.keys(): Infos[seq_id] = {"ref_len": seq["reference"]["sequence_length"], "N_hits": aro_count}
+				else:
+					assert Infos[seq_id]["ref_len"] == seq["reference"]["sequence_length"], "Reference length mismatch for sequence ID: " + seq_id
+					Infos[seq_id]["N_hits"] += aro_count
+	return Infos
+
+def read_many_alignements_json_1(files,mapq_average_min = -1, mapq_average_max = 10000, just_completely_mapped=True, read_length = 255, subsample = 1,filtro_abbondanza = 0):
+	r = {}
+	for i in files:
+		Infos = read_alignement_json_subsample_1(i, mapq_average_min = mapq_average_min, 
+											mapq_average_max = mapq_average_max,
+											just_completely_mapped = just_completely_mapped,
+											read_length = read_length,
+											subsample = subsample)
+		if filtro_abbondanza > 0:
+			#iinfo = {}
+			#for k, v in Infos.items():
+			#	if v["N_hits"] > filtro_abbondanza:
+			#		iinfo[k] = v
+			#return iinfo
+			Infos = {k:v for k,v in Infos.items() if int(v["N_hits"]) > filtro_abbondanza}
+		Infos = {k: v["N_hits"] * read_length / int(v["ref_len"]) for k, v in Infos.items()}
+		name = i.split("/")[-3]
+		r[name] = Infos
+	r = pd.DataFrame(r).fillna(0)
+	#if filtro_abbondanza > 0:
+	#	r = r.loc[:, (r != 0).any(axis=0)]
+	#	r = r.loc[:, (r.sum(axis=0) > filtro_abbondanza)]
 	return r
